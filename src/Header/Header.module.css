@@ -1,0 +1,26 @@
+.headerContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: hsl(0, 0%, 85%);
+    padding: 30px 0 15px 0;
+    position: relative; /* 1 */
+  }
+  
+  .LogInButton {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: hsl(0, 0%, 0%);
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  
+  .LogInButton img {
+    width: 24px;
+  }
+  
+  .LogInButton:hover{
+    color: hsl(0, 0%, 35%);
+  }

@@ -1,0 +1,33 @@
+.footerContainer{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border: none;
+    background-color: hsl(0, 0%, 90%);
+    min-width: 100%;
+}
+
+.footerContainer a{
+    color: hsl(0, 0%, 50%);
+    text-decoration: none;
+}
+
+.footerContainer a:hover{
+    color: hsl(0, 0%, 30%);
+}
+
+.About img{
+    width: 120px;
+    height: 120px;
+    border: none;
+    border-radius: 5px;
+}
+
+.About{
+    text-align: center;
+    user-select: none;
+}
+
+.About:visited{
+    user-select: none;
+}
