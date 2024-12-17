@@ -4,4 +4,4 @@ Currently the project is on it's early stage of development, so it might seem a 
 
 Technologies used: HTML, CSS, JavaScript, React.
 
-Author strictly prohibits any anouthorised mentions or uses of hiw work without his permisson.
+Author strictly prohibits any anouthorised mentions or uses of his work without his permisson.
