@@ -1,0 +1,103 @@
+.headerContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: hsl(0, 0%, 85%);
+  padding: 30px 0 15px 0;
+  position: relative; /* 1 */
+}
+
+.enterWrapper{
+  position: relative;
+  /* border: 1px solid; */
+}
+
+.enterButton {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: hsl(0, 0%, 0%);
+  transition: background-color 0.3s ease;
+  user-select: none;
+}
+  
+.enterButton img {
+  width: 24px;
+}
+  
+.enterButton:hover{
+  color: hsl(0, 0%, 35%);
+}
+
+.modalWindowEnter {
+  margin-top: 15px;
+  position: absolute;
+  top: 100%;
+  left: -125%;
+  /* border: 1px solid;
+  border-radius: 5px; */
+}
+
+.modalWindowEnterContent{
+  /* width: 130px; */
+  /* height: 60px; */
+  display: flex;
+  flex-direction: column;
+  /* align-items: center;
+  justify-content: ; */
+  gap: 5px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  background-color: hsl(0, 0%, 80%);
+}
+
+.modalWindowEnterContent button{
+  border: none;
+  background-color: hsl(0, 0%, 85%);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.modalWindowEnterContent button:hover{
+  background-color: hsl(0, 0%, 75%);
+}
+
+.modalWindowLoginAndSignIn{
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modalWindowLoginAndSignInContent{
+  width: 550px;
+  height: 350px;
+  background-color: hsl(0, 0%, 60%);
+  border: none;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+  flex-direction: column;
+  font-size: 20px;
+  gap: 7px;
+}
+
+.LoginSignInModalsWrapper:first-child{
+  height: 1000px;
+}
+
+.modalEnterCancelLogin{
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}

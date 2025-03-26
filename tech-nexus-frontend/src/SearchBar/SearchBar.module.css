@@ -1,0 +1,28 @@
+.searchBarContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 100px; 
+}
+
+.searchBarInputBox {
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid hsl(0, 0%, 80%);
+    border-radius: 4px;
+    outline: none;
+    margin-right: 7px;
+    flex-grow: 1;
+    width: 600px; 
+}
+
+.MagGlassButton {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.MagGlassButton img {
+    width: 24px; 
+}

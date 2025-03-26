@@ -1,0 +1,18 @@
+{
+  "name": "electronics_and_computer_parts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run start:backend\"",
+    "dev:frontend": "cd tech-nexus-frontend && npm run dev", 
+    "start:backend": "cd tech-nexus-backend && npm start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

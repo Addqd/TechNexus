@@ -1,0 +1,33 @@
+.characteristicsWrapper {
+    overflow: hidden;
+    border: 1px solid;
+    width: 900px;
+}
+
+.characteristicsRow {
+    margin-top: 3px;
+    margin-bottom: 3px;
+    display: flex;
+    flex-direction: row;
+}
+
+.characteristicsTableHeaderDiv {
+    position: relative;
+    align-items: start;
+    width: 40%;
+}
+
+.underlineDelimeter {
+    position: absolute;
+    top: 14px;
+    left: 0px;
+    right: 8px;
+    content: "";
+    border-bottom: 1px solid hsla(0, 0%, 0%, 0.14);
+}
+
+.characteristicsTableCharValue {
+    width: 60%;
+    display: flex;
+    flex-direction: row;
+}
