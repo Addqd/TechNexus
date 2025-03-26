@@ -67,11 +67,44 @@ export default function Header(){
         catch (error) {
             console.error("Registration failed", error);
         }
-    }
+    };
+
+    // Login user on submit
+    const handleLoginFormSubmit = async (e) => {
+        e.preventDefault();
+
+        const loginData = {
+            login: e.target.login.value,
+            password: e.target.password.value
+        };
+
+        try {
+            const response = await fetch("http://localhost:8000/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(loginData)
+            });
+
+            if(response.ok){
+                const data = await response.json();
+                window.alert(data.message);
+                closeLoginModal();
+            }
+            else{
+                const errorData = await response.json();
+                window.alert(errorData.error);
+            }
+        }
+        catch (error) {
+            console.error("Login failed", error);
+        }
+    };
 
     /* 
-        1. Implement The hole login and sign in thing <--
-        2. Change usercircle and it's corresponding modal when logged in
+        1. Implement The hole login and sign in thing (DONE)
+        2. Add validation of user data (password.correct?, login.correct?)
+        on regestration and login <--
+        3. Change usercircle and it's corresponding modal when logged in (PENDING)
     */
 
     return(
@@ -127,14 +160,14 @@ export default function Header(){
                 <div>
                     {isLoginModalOpen && 
                         <div className={styles.modalWindowLoginAndSignIn}>
-                            <form className={styles.modalWindowLoginAndSignInContent}>
-                                <label >Логин</label>
-                                <input type="text" placeholder="Введите ваш логин"/>
+                            <form className={styles.modalWindowLoginAndSignInContent} onSubmit={handleLoginFormSubmit}>
+                                <label >Имя пользователя или Emai</label>
+                                <input type="text" name="login" placeholder="Введите ваш логин"/>
                                 <label>Пароль</label>
-                                <input type="text" placeholder="Ввелите ваш пароль"/>
+                                <input type="text" name="password" placeholder="Ввелите ваш пароль"/>
                                 <div className={styles.modalEnterCancelLogin}>
                                     <button onClick={closeLoginModal}>Отмена</button>
-                                    <button>Войти</button>  
+                                    <button type="submit">Войти</button>  
                                 </div>
                                 <span>Забыли пароль?</span>
                                 <span onClick={() => {

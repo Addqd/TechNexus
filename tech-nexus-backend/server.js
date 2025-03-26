@@ -76,7 +76,6 @@ app.get("/products/:id", async (req, res) => {
         console.error(error);
         res.status(500).json({error: "Code 500 (Server error)"});
     }
-    
 });
 
 // Route for user registration
@@ -100,6 +99,37 @@ app.post("/register", async (req, res) => {
         });
     } 
     catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Code 500 (Server error)" });
+    }
+});
+
+// Route for user sign in
+// (Email OR Username) AND Password is required
+// Password is being compared with existing hash in the database using bcrypt module
+
+app.post("/login", async (req, res) => {
+    try{
+        const { login, password } = req.body;
+
+        const user = await pool.query(
+            `SELECT * FROM users WHERE username = $1 OR email = $1`,
+            [login]
+        );
+
+        if (user.rows.length === 0){
+            return res.status(401).json({ error: "Неверный логин или пароль" });
+        }
+
+        const validPassword = await bcrypt.compare(password, user.rows[0].password);
+
+        if(!validPassword){
+            return res.status(401).json({ error: "Неверный логин или пароль" });
+        };
+
+        res.status(200).json({ message: "Вход был выполнен успешно", user: user.rows[0] });
+    }
+    catch(error){
         console.error(error);
         res.status(500).json({ error: "Code 500 (Server error)" });
     }
