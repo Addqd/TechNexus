@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import pool from "./db.js";
+import bcrypt from "bcrypt";
 
 const app = express();
 
@@ -73,12 +74,36 @@ app.get("/products/:id", async (req, res) => {
     }
     catch(error) {
         console.error(error);
-        res.status(500).json({error: 'Code 500 (Server error)'});
+        res.status(500).json({error: "Code 500 (Server error)"});
     }
     
 });
 
+// Route for user registration
+// Password is being hashed using bcrypt module
 
+app.post("/register", async (req, res) => {
+    try {
+        const { username, email, password } = req.body;
+
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        const registration = await pool.query(
+            `INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *;`,
+            [username, email, hashedPassword]
+        );
+
+        res.status(201).json({
+            message: "User registered seccessfully",
+            newUser: registration.rows[0]
+        });
+    } 
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Code 500 (Server error)" });
+    }
+});
 
 app.listen(8000, () => {
     console.log("Server is listenning on port 8000");

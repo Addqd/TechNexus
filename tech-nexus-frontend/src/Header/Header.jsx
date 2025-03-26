@@ -37,6 +37,38 @@ export default function Header(){
         setIsLoginModalOpen(false);
     };
 
+    // Register user on submit
+    const handleRegisterFormSubmit = async (e) => {
+        e.preventDefault();
+
+        const userData = {
+            username: e.target.username.value,
+            password: e.target.password.value,
+            email: e.target.email.value
+        };
+
+        try {
+            const response = await fetch("http://localhost:8000/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(userData)
+            });
+
+            if(response.ok){
+                const data = await response.json();
+                window.alert(data.message);
+                closeSignInModal();
+            }
+            else{
+                const errorData = await response.json();
+                window.alert(errorData.error);
+            }
+        } 
+        catch (error) {
+            console.error("Registration failed", error);
+        }
+    }
+
     /* 
         1. Implement The hole login and sign in thing <--
         2. Change usercircle and it's corresponding modal when logged in
@@ -68,18 +100,18 @@ export default function Header(){
                 <div>
                     {isSignInModalOpen &&
                         <div className={styles.modalWindowLoginAndSignIn}>
-                            <form className={styles.modalWindowLoginAndSignInContent}>
+                            <form className={styles.modalWindowLoginAndSignInContent} onSubmit={handleRegisterFormSubmit}>
                                 <label>Псевдоним</label>
-                                <input type="text" placeholder="Введите ваш псевдоним"/>
+                                <input type="text" name="username" placeholder="Введите ваш псевдоним"/>
                                 <label>Пароль</label>
-                                <input type="text" placeholder="Введите ваш пароль"/>
+                                <input type="text" name="password" placeholder="Введите ваш пароль"/>
                                 <label>Повторите пароль</label>
                                 <input type="text" placeholder="Повторите ваш пароль"/>
                                 <label>Email</label>
-                                <input type="text" placeholder="Введите ваш Email"/>
+                                <input type="text" name="email" placeholder="Введите ваш Email"/>
                                 <div className={styles.modalEnterCancelLogin}>
                                     <button onClick={closeSignInModal}>Отмена</button>
-                                    <button>Войти</button>  
+                                    <button type="submit">Зарегистрироваться</button>  
                                 </div>
                                 <span onClick={() => {
                                    closeSignInModal();
