@@ -12,6 +12,7 @@ export default function Header(){
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
     const [isEnterModalOpen, setIsEnterModalOpen] = useState(false);
+    const [isUserLogedIn, setIsUserLogedIn] = useState(false);
 
     const openSignInModal = () => {
         setIsSignInModalOpen(true);
@@ -63,6 +64,8 @@ export default function Header(){
                 const errorData = await response.json();
                 window.alert(errorData.error);
             }
+
+            console.log(`isUserLogedIn: ${isUserLogedIn}`);
         } 
         catch (error) {
             console.error("Registration failed", error);
@@ -87,6 +90,7 @@ export default function Header(){
 
             if(response.ok){
                 const data = await response.json();
+                setIsUserLogedIn(true);
                 window.alert(data.message);
                 closeLoginModal();
             }
@@ -106,6 +110,10 @@ export default function Header(){
         on regestration and login <--
         3. Change usercircle and it's corresponding modal when logged in (PENDING)
     */
+
+    useEffect(() => {
+        console.log(`isUserLogedIn: ${isUserLogedIn}`);
+    }, [isUserLogedIn]);
 
     return(
         <>
@@ -129,6 +137,7 @@ export default function Header(){
                </div>
 
                 {/* Sign in modal */}
+                {/* Not more than 30 symb,  */}
 
                 <div>
                     {isSignInModalOpen &&
@@ -161,7 +170,7 @@ export default function Header(){
                     {isLoginModalOpen && 
                         <div className={styles.modalWindowLoginAndSignIn}>
                             <form className={styles.modalWindowLoginAndSignInContent} onSubmit={handleLoginFormSubmit}>
-                                <label >Имя пользователя или Emai</label>
+                                <label >Имя пользователя или Email</label>
                                 <input type="text" name="login" placeholder="Введите ваш логин"/>
                                 <label>Пароль</label>
                                 <input type="text" name="password" placeholder="Ввелите ваш пароль"/>

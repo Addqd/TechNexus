@@ -87,15 +87,6 @@ app.post("/register", async (req, res) => {
         const forbiddenChars = /["'`;<>\\\n\r\t\b\f]|\/\*|\*\//;
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/;
 
-        const existingUser = await pool.query(
-            `SELECT * FROM users WHERE email = $1 OR username = $2;`,
-            [email, username]
-        );
-
-        if(existingUser.rows.length > 0) {
-            return res.status(400).json( {error: "Пользователь с таким именем или email уже существует" } );
-        };
-
         if(!username || !email || !password) {
             return res.status(400).json({ error: "Все поля обязательны для заполнения" });
         };
@@ -112,12 +103,25 @@ app.post("/register", async (req, res) => {
             return res.status(400).json({ error: "Имя пользователя должно быть от 3 до 45 символов включительно" });
         };
 
+        if(forbiddenChars.test(username)) {
+            return res.status(400).json({ error: "Имя пользователя содержит один или несколько запрещенных символов" });
+        };
+
         if(!emailRegex.test(email)) {
             return res.status(400).json({ error: "Неверный формат email, используйте существующий адрес электронной почты" });
         };
         
         if(forbiddenChars.test(email)) {
             return res.status(400).json({ error: "email содержит один или несколько запрещенных символов" });
+        };
+
+        const existingUser = await pool.query(
+            `SELECT * FROM users WHERE email = $1 OR username = $2;`,
+            [email, username]
+        );
+
+        if(existingUser.rows.length > 0) {
+            return res.status(400).json( {error: "Пользователь с таким именем или email уже существует" } );
         };
 
         const saltRounds = 10;
