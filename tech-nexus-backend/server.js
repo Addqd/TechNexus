@@ -84,6 +84,41 @@ app.get("/products/:id", async (req, res) => {
 app.post("/register", async (req, res) => {
     try {
         const { username, email, password } = req.body;
+        const forbiddenChars = /["'`;<>\\\n\r\t\b\f]|\/\*|\*\//;
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/;
+
+        const existingUser = await pool.query(
+            `SELECT * FROM users WHERE email = $1 OR username = $2;`,
+            [email, username]
+        );
+
+        if(existingUser.rows.length > 0) {
+            return res.status(400).json( {error: "Пользователь с таким именем или email уже существует" } );
+        };
+
+        if(!username || !email || !password) {
+            return res.status(400).json({ error: "Все поля обязательны для заполнения" });
+        };
+
+        if(password.length < 8 || password.length > 30) {
+            return res.status(400).json({ error: "Пароль должен быть от 8 до 30 символов включительно" })
+        };
+
+        if(forbiddenChars.test(password)) {
+            return res.status(400).json( {error: "Пароль содержит один или несколько запрещенных символов"} );
+        };
+
+        if(username.length < 3 || username.length > 45){
+            return res.status(400).json({ error: "Имя пользователя должно быть от 3 до 45 символов включительно" });
+        };
+
+        if(!emailRegex.test(email)) {
+            return res.status(400).json({ error: "Неверный формат email, используйте существующий адрес электронной почты" });
+        };
+        
+        if(forbiddenChars.test(email)) {
+            return res.status(400).json({ error: "email содержит один или несколько запрещенных символов" });
+        };
 
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -94,7 +129,7 @@ app.post("/register", async (req, res) => {
         );
 
         res.status(201).json({
-            message: "User registered seccessfully",
+            message: "User registered successfully",
             newUser: registration.rows[0]
         });
     } 
