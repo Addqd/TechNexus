@@ -1,11 +1,9 @@
 import SearchBar from "../SearchBar/SearchBar.jsx";
 import userCirlcle from "../assets/user-circle-svgrepo-com.svg";
-import signIn from "../assets/sign-in.svg";
 import styles from "./Header.module.css";
 import SideBarMenu from "../SideBarMenu/SideBarMenu.jsx";
+import Cookies from "js-cookie";
 import { useState, useEffect } from "react";
-
-// Impement user login and registration, wether as a simple buyer, or as a seller (give abbility to register their brand)
 
 export default function Header(){
 
@@ -13,6 +11,7 @@ export default function Header(){
     const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
     const [isEnterModalOpen, setIsEnterModalOpen] = useState(false);
     const [isUserLogedIn, setIsUserLogedIn] = useState(false);
+    const [isMiniAccountModalOpen, setIsMiniAccountModalOpen] = useState(false);
 
     const openSignInModal = () => {
         setIsSignInModalOpen(true);
@@ -37,6 +36,37 @@ export default function Header(){
     const closeLoginModal = () => {
         setIsLoginModalOpen(false);
     };
+
+    const openMiniAccountModal = () => {
+        setIsMiniAccountModalOpen(true);
+    };
+
+    const closeMiniAccountModal = () => {
+        setIsMiniAccountModalOpen(false);
+    };
+
+    useEffect(() => {
+        const userLoggedIn = Cookies.get("isUserLoggedIn");
+        if(userLoggedIn === "true") {
+            setIsUserLogedIn(true);
+        }
+
+        function getCookies() {
+            const cookies = document.cookie.split('; ');
+            const cookieObject = {};
+            
+            cookies.forEach(cookie => {
+                const [key, value] = cookie.split('=');
+                cookieObject[key] = decodeURIComponent(value);
+            });
+            
+            return cookieObject;
+        }
+        
+        const allCookies = getCookies();
+        console.log(allCookies);
+        
+    }, []);
 
     // Register user on submit
     const handleRegisterFormSubmit = async (e) => {
@@ -91,8 +121,10 @@ export default function Header(){
             if(response.ok){
                 const data = await response.json();
                 setIsUserLogedIn(true);
+                Cookies.set("isUserLoggedIn", "true", { expires: 7 });
                 window.alert(data.message);
                 closeLoginModal();
+                window.location.reload();
             }
             else{
                 const errorData = await response.json();
@@ -104,11 +136,20 @@ export default function Header(){
         }
     };
 
+    // Logout function
+
+    const logOut = () => {
+        Cookies.remove("isUserLoggedIn");
+        window.location.reload();
+    };
+
     /* 
         1. Implement The hole login and sign in thing (DONE)
-        2. Add validation of user data (password.correct?, login.correct?)
-        on regestration and login <--
-        3. Change usercircle and it's corresponding modal when logged in (PENDING)
+        2. Add validation of user data on server (password.correct?, login.correct?)
+        on regestration and login (DONE)
+        3. Change usercircle and it's corresponding modal when logged in <-- (Add more btns, modify registration, add state change of userloggedin in there as well, and page refresh)
+        4. Add validation of user data in frontend as well (PENDING)
+        5. Think about adding jwt token authorization (PENDING)
     */
 
     useEffect(() => {
@@ -120,20 +161,45 @@ export default function Header(){
         <header className={styles.headerContainer}>
                <SideBarMenu />
                <SearchBar />
-               <div className={styles.enterWrapper}>
-                    <button className={styles.enterButton} onClick={isEnterModalOpen ? closeEnterModal : openEnterModal}>
-                        <img src={userCirlcle} alt="Войти" /><br />Вход
-                    </button> 
-                    <div>
-                        {isEnterModalOpen &&
-                            <div className={styles.modalWindowEnter}>
-                                <div className={styles.modalWindowEnterContent}>
-                                    <button onClick={openLoginModal}>Войти</button>
-                                    <button onClick={openSignInModal}>Регистрация</button>
-                                </div>
+               <div>
+                    {!isUserLogedIn &&
+                        <div className={styles.enterWrapper}>
+                            <button className={styles.enterButton} onClick={isEnterModalOpen ? closeEnterModal : openEnterModal}>
+                                <img src={userCirlcle} alt="Войти" /><br />Вход
+                            </button> 
+                            <div>
+                                {isEnterModalOpen &&
+                                    <div className={styles.modalWindowEnter}>
+                                        <div className={styles.modalWindowEnterContent}>
+                                            <button onClick={openLoginModal}>Войти</button>
+                                            <button onClick={openSignInModal}>Регистрация</button>
+                                            <button onClick={logOut}>Выйти</button>
+                                        </div>
+                                    </div>
+                                }
                             </div>
-                        }
-                    </div>
+                        </div>     
+                    }
+               </div>
+               
+
+               <div>
+                    {isUserLogedIn &&
+                        <div className={styles.enterWrapper}>
+                            <button className={styles.enterButton} onClick={isMiniAccountModalOpen ? closeMiniAccountModal : openMiniAccountModal}>
+                                <img src={userCirlcle} alt="Войти" /><br />Аккаунт
+                            </button>
+                            <div>
+                                {isMiniAccountModalOpen &&
+                                    <div className={styles.modalWindowEnter}>
+                                        <div className={styles.modalWindowEnterContent}>
+                                            <button onClick={logOut}>Выйти</button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
                </div>
 
                 {/* Sign in modal */}
