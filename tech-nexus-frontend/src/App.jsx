@@ -14,20 +14,23 @@ export default function App() {
 
   return (
       <Router>
+        
         <Header /> 
-          <Routes>
+          <div style={{ marginTop: "30px", marginBottom: "30px" }}>
+            <Routes>
 
-            {/* Home Page */}
-            <Route path="/" element={<HomePage />}/>
+              {/* Home Page */}
+              <Route path="/" element={<HomePage />}/>
 
-            {/* Product page */}
-            <Route path="/product/:id" element={<ProductPage />}/>
+              {/* Product page */}
+              <Route path="/product/:id" element={<ProductPage />}/>
 
-            {/* User profile */}
-            <Route path="/profile" element={<UserProfile/>}/>
+              {/* User profile */}
+              <Route path="/profile" element={<UserProfile/>}/>
 
-          </Routes>
-        <Footer />
+            </Routes>
+          </div>
+        <Footer />  
       </Router>
   )
 }

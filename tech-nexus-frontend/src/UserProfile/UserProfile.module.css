@@ -1,0 +1,26 @@
+.userProfileWrapper{
+    display: flex;
+    flex-direction: row;
+    gap: 600px;
+}
+
+.optionWrapper {
+    display: none;
+}
+
+.optionWrapper.active {
+    display: flex;
+    flex-direction: column;
+}
+
+.section{
+    cursor: pointer;
+}
+
+.mainPic{
+    width: 200px;
+    height: 200px;
+    border: none;
+    border-radius: 50%;
+    object-fit: cover;
+}

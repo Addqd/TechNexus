@@ -1,95 +1,108 @@
 import styles from "./UserProfile.module.css";
+import { useState } from "react";
 
 export default function UserProfile () {
+
+    const [selectedSection, setSelectedSection] = useState("profile");
+
+    const sections = [
+        {id: "profile", label: "Профиль"},
+        {id: "orders", label: "Заказы"},
+        {id: "history", label: "Купленные товары"},
+        {id: "favorites", label: "Избранное"},
+        {id: "brand", label: "Ваш бренд"},
+        {id: "payment", label: "Способ оплаты"}
+    ];
+
+    const renderSection = (section) => {
+        switch (section) {
+            case "profile":
+                return (
+                    <>
+                        <img className={styles.mainPic} src="/images/testImage.jpg" alt="Изображение профиля" />
+                        <span>Username</span>
+                        <span>Баланс 100</span>
+                        <span>Продавец ли?</span>
+                        <span>Адресс доставки</span>
+                        <span>Редактировать профиль</span>
+                    </>
+                );
+            case "orders": 
+                return (
+                    <>
+                        <span>Product card goes here</span>
+                        <span>Status of the purchase</span>
+                        <span>Approximate date of arrival</span>
+                    </>
+                );
+            case "history":
+                return (
+                    <>
+                        <span>Product card goes here</span>
+                        <span>Rewiev, if never reviewed: Provide an option to do so</span>
+                    </>
+                );
+            case "favorites":
+                return (
+                    <>
+                        <span>Product card goes here</span>
+                        <span>Is in stock, if true - it's ammount</span>
+                    </>
+                );
+            case "brand": 
+                return (
+                    <>
+                        <span>Create a brand if not registered</span>
+                        <img className={styles.mainPic} src="/images/testImage.jpg" alt="Изображение бренда" />
+                        <span>Brand name</span>
+                        <span>Отзывы клиентов</span>
+                        <span>Создать товар</span>
+                        <span>Product card goes here, all brand's products</span>
+                    </>
+                );
+            case "payment":
+                return (
+                    <>
+                        <span>Cool looking box like banking card, with registration</span>
+                    </>
+                );
+            default:
+                return null;
+        }
+    };
+
     return (
         <>
+            <div className={styles.userProfileWrapper}>
 
-            {/* Sections of choice */}
+                {/* Sections sidebar */}
 
-            <div className={styles.sectionsWrapper}>
-                <div className={styles.section}>
-                    Профиль
+                <div className={styles.sectionsWrapper}>
+                    {sections.map((section) => (
+                        <div
+                            key={section.id}
+                            className={styles.section}
+                            onClick={() => setSelectedSection(section.id)}
+                        >
+                            {section.label}
+                        </div>
+                    ))}
                 </div>
-                <div className={styles.section}>
-                    Заказы
+
+                {/* Selected section */}
+
+                <div className={styles.renderArea}>
+                    {sections.map((section) => (
+                        <div
+                            key={section.id}
+                            className={`${styles.optionWrapper} ${styles[section.id]} ${selectedSection === section.id ? styles.active : ""}`}
+                        >
+                            {renderSection(section.id)}
+                        </div>
+                    ))}
                 </div>
-                <div className={styles.section}>
-                    Купленные товары
-                </div>
-                <div className={styles.section}>
-                    Избранное
-                </div>
-                <div className={styles.section}>
-                    Ваш бренд
-                </div>
-                <div className={styles.section}>
-                    Способ оплаты
-                </div>
+
             </div>
-
-            {/* Components corresponding to choises */}
-
-            {/* Profile */}
-
-            <div className={styles.profileWrapper}>
-                <div className={styles.profileContent}>
-                    <img src="/images/testImage.jpg" alt="Изображение профиля" />
-                    <span>Username</span>
-                    <span>Баланс 100</span>
-                    <span>Продавец ли?</span>
-                    <span>Редактировать профиль</span>
-                </div>
-            </div>
-
-            {/* Orders */}
-
-            <div className={styles.ordersWrapper}>
-                <div className={styles.ordersContent}>
-                    <span>Product card goes here</span>
-                    <span>Status of the purchase</span>
-                    <span>Approximate date of arrival</span>
-                </div>
-            </div>
-
-            {/* History */}
-
-            <div className={styles.historyWrapper}>
-                <div className={styles.historyContent}>
-                    <span>Product card goes here</span>
-                    <span>Rewiev, if never reviewed: Provide an option to do so</span>
-                </div>
-            </div>
-
-            {/* Favorites */}
-
-            <div className={styles.favoritesWrapper}>
-                <div className={styles.favoritesContent}>
-                    <span>Product card goes here</span>
-                    <span>Is in stock, if true - it's ammount</span>
-                </div>
-            </div>
-
-            {/* Brand */}
-
-            <div className={styles.brandWrapper}>
-                <div className={styles.brandContent}>
-                    <span>Create a brand if not registered</span>
-                    <img src="/images/testImage.jpg" alt="Изображение бренда" />
-                    <span>Brand name</span>
-                    <span>Отзывы клиентов</span>
-                    <span>Создать товар</span>
-                    <span>Product card goes here, all brand's products</span>
-                </div>
-            </div>
-
-            {/* Payment method */}
-            
-            <div className={styles.paymentWrapper}>
-                <div className={styles.paymentContent}>
-                    <span>Cool looking box like banking card, with registration</span>
-                </div>
-            </div>
-
         </>
     );   
 }
