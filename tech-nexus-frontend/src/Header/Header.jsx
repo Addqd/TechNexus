@@ -3,6 +3,7 @@ import userCirlcle from "../assets/user-circle-svgrepo-com.svg";
 import styles from "./Header.module.css";
 import SideBarMenu from "../SideBarMenu/SideBarMenu.jsx";
 import Cookies from "js-cookie";
+import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 export default function Header(){
@@ -191,6 +192,7 @@ export default function Header(){
                
                 {/* Shows user img and name with coresponding actions in modal IF loged in */}
 
+                {/* Redirect to homepage if loged out */}
                <div>
                     {isUserLogedIn &&
                         <div className={styles.enterWrapper}>
@@ -201,7 +203,11 @@ export default function Header(){
                                 {isMiniAccountModalOpen &&
                                     <div className={styles.modalWindowEnter}>
                                         <div className={styles.modalWindowEnterContent}>
-                                            <button>Профиль</button>
+                                            <button>
+                                                <Link to={"/profile"}>
+                                                    Профиль
+                                                </Link>
+                                            </button>
                                             <button>Заказы</button>
                                             <button>Баланс</button>
                                             <button>Избранное</button>

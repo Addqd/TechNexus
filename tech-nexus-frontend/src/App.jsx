@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomePage from "./Pages/HomePage/HomePage.jsx";
 import ProductPage from "./Pages/ProductPage/ProductPage.jsx";
+import UserProfile from "./UserProfile/UserProfile.jsx";
 import Header from "./Header/Header.jsx";
 import Footer from "./Footer/Footer.jsx";
 
@@ -21,6 +22,9 @@ export default function App() {
 
             {/* Product page */}
             <Route path="/product/:id" element={<ProductPage />}/>
+
+            {/* User profile */}
+            <Route path="/profile" element={<UserProfile/>}/>
 
           </Routes>
         <Footer />
