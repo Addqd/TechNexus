@@ -88,7 +88,10 @@ export default function Header(){
             if(response.ok){
                 const data = await response.json();
                 window.alert(data.message);
+                setIsUserLogedIn(true);
+                Cookies.set("isUserLoggedIn", "true", { expires: 7 });
                 closeSignInModal();
+                window.location.reload();
             }
             else{
                 const errorData = await response.json();
@@ -120,9 +123,9 @@ export default function Header(){
 
             if(response.ok){
                 const data = await response.json();
+                window.alert(data.message);
                 setIsUserLogedIn(true);
                 Cookies.set("isUserLoggedIn", "true", { expires: 7 });
-                window.alert(data.message);
                 closeLoginModal();
                 window.location.reload();
             }
@@ -139,6 +142,7 @@ export default function Header(){
     // Logout function
 
     const logOut = () => {
+        setIsUserLogedIn(false);
         Cookies.remove("isUserLoggedIn");
         window.location.reload();
     };
@@ -161,6 +165,9 @@ export default function Header(){
         <header className={styles.headerContainer}>
                <SideBarMenu />
                <SearchBar />
+
+                {/* Shows default svg and btns IF NOT loged in */}
+
                <div>
                     {!isUserLogedIn &&
                         <div className={styles.enterWrapper}>
@@ -182,6 +189,7 @@ export default function Header(){
                     }
                </div>
                
+                {/* Shows user img and name with coresponding actions in modal IF loged in */}
 
                <div>
                     {isUserLogedIn &&
@@ -193,6 +201,11 @@ export default function Header(){
                                 {isMiniAccountModalOpen &&
                                     <div className={styles.modalWindowEnter}>
                                         <div className={styles.modalWindowEnterContent}>
+                                            <button>Профиль</button>
+                                            <button>Заказы</button>
+                                            <button>Баланс</button>
+                                            <button>Избранное</button>
+                                            <button>Купленные товары</button>
                                             <button onClick={logOut}>Выйти</button>
                                         </div>
                                     </div>
@@ -203,7 +216,6 @@ export default function Header(){
                </div>
 
                 {/* Sign in modal */}
-                {/* Not more than 30 symb,  */}
 
                 <div>
                     {isSignInModalOpen &&

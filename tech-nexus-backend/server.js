@@ -81,6 +81,10 @@ app.get("/products/:id", async (req, res) => {
 // Route for user registration
 // Password is being hashed using bcrypt module
 
+// BURN THIS WITH FLAMETHROWER
+
+// Optimize repetitions
+
 app.post("/register", async (req, res) => {
     try {
         const { username, email, password } = req.body;
