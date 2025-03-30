@@ -13,6 +13,7 @@ export default function Header(){
     const [isEnterModalOpen, setIsEnterModalOpen] = useState(false);
     const [isMiniAccountModalOpen, setIsMiniAccountModalOpen] = useState(false);
     const [isUserLogedIn, setIsUserLogedIn] = useState(false);
+    const [miniUser, setMiniUser] = useState({ name: "", img: userCirlcle });
     const miniAccountModalRef = useRef(null);
     const enterModalRef = useRef(null);
 
@@ -56,6 +57,10 @@ export default function Header(){
         const userLoggedIn = Cookies.get("isUserLoggedIn");
         if(userLoggedIn === "true") {
             setIsUserLogedIn(true);
+            const userId = Cookies.get("userId");
+            if (userId) {
+                fetchMiniUserData(userId);
+            }
         }
 
         function getCookies() {
@@ -131,6 +136,7 @@ export default function Header(){
                 window.alert(data.message);
                 setIsUserLogedIn(true);
                 Cookies.set("isUserLoggedIn", "true", { expires: 7 });
+                Cookies.set("userId", data.newUser.id, { expires: 7 });
                 closeSignInModal();
                 window.location.reload();
             }
@@ -167,6 +173,7 @@ export default function Header(){
                 window.alert(data.message);
                 setIsUserLogedIn(true);
                 Cookies.set("isUserLoggedIn", "true", { expires: 7 });
+                Cookies.set("userId", data.user.id, { expires: 7 });
                 closeLoginModal();
                 window.location.reload();
             }
@@ -180,11 +187,26 @@ export default function Header(){
         }
     };
 
+    const fetchMiniUserData = async (userId) => {
+        try{
+            const response = await fetch(`http://localhost:8000/mini_profile/${userId}`);
+            if (response.ok) {
+                const data = await response.json();
+                setMiniUser({ name: data.username, img: data.profile_img || userCirlcle });
+            }
+        }
+        catch (error) {
+            console.error("Ошибка при загрузке милого профиля пользователя", error);
+        }
+    };
+
     // Logout function
 
     const logOut = () => {
         setIsUserLogedIn(false);
         Cookies.remove("isUserLoggedIn");
+        setMiniUser({ name: "", img: userCirlcle});
+        Cookies.remove("userId");
         window.location.reload();
     };
 
@@ -238,8 +260,8 @@ export default function Header(){
                     {isUserLogedIn &&
                         <div className={styles.enterWrapper}>
                             <button className={styles.enterButton} onClick={isMiniAccountModalOpen ? closeMiniAccountModal : openMiniAccountModal}>
-                                <img src={userCirlcle} alt="Профиль" />
-                                <span>Борис</span>
+                                <img src={miniUser.img} alt="Картинка профиля" />
+                                <span>{miniUser.name}</span>
                             </button>
                             <div>
                                 {isMiniAccountModalOpen &&

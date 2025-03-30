@@ -178,6 +178,27 @@ app.post("/login", async (req, res) => {
     }
 });
 
+// Mini profile: img and name in header
+
+app.get("/mini_profile/:user_id", async (req, res) => {
+    try {
+        const { user_id } = req.params;
+
+        const miniUser = await pool.query(`SELECT username, profile_img FROM users WHERE id = $1`, [user_id]);
+
+        if (miniUser.rows.length === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        
+        res.json(miniUser.rows[0]);
+
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Code 500 (Server error)" });
+    }
+});
+
 app.listen(8000, () => {
     console.log("Server is listenning on port 8000");
 });
