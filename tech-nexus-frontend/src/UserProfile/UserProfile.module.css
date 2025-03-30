@@ -1,11 +1,21 @@
 .userProfileWrapper{
     display: flex;
     flex-direction: row;
-    gap: 600px;
+    gap: 300px;
+   /*  border: 1px solid;   */
+    max-width: 1200px;
+    height: 500px;
+    /* justify-content: center; */
+    align-items: center;
+    margin: 200px auto;
+    padding-left: 200px;
 }
 
 .optionWrapper {
     display: none;
+   /*  border: none;
+    border-radius: 5px;
+    background-color: hsl(0, 0%, 85%); */
 }
 
 .optionWrapper.active {
@@ -13,8 +23,28 @@
     flex-direction: column;
 }
 
-.section{
+.sectionsWrapper{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     cursor: pointer;
+    font-size: 25px;
+    user-select: none;
+}
+
+.section{
+    padding: 5px;
+    transition: background-color 0.3s ease;
+    border: none;
+    border-radius: 5px;
+}
+
+.section:hover{
+    background-color: hsl(0, 0%, 80%);
+}
+
+.mainPicWrapper{
+    user-select: none;
 }
 
 .mainPic{
@@ -23,4 +53,8 @@
     border: none;
     border-radius: 50%;
     object-fit: cover;
+}
+
+.renderArea{
+    font-size: 20px;
 }

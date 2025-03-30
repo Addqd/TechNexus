@@ -19,7 +19,9 @@ export default function UserProfile () {
             case "profile":
                 return (
                     <>
-                        <img className={styles.mainPic} src="/images/testImage.jpg" alt="Изображение профиля" />
+                        <div className={styles.mainPicWrapper}>
+                           <img className={styles.mainPic} src="/images/testImage.jpg" alt="Изображение профиля" /> 
+                        </div>
                         <span>Username</span>
                         <span>Баланс 100</span>
                         <span>Продавец ли?</span>
@@ -53,7 +55,9 @@ export default function UserProfile () {
                 return (
                     <>
                         <span>Create a brand if not registered</span>
-                        <img className={styles.mainPic} src="/images/testImage.jpg" alt="Изображение бренда" />
+                        <div className={styles.mainPicWrapper}>
+                            <img className={styles.mainPic} src="/images/testImage.jpg" alt="Изображение бренда" />
+                        </div>
                         <span>Brand name</span>
                         <span>Отзывы клиентов</span>
                         <span>Создать товар</span>
