@@ -103,8 +103,8 @@ app.post("/register", async (req, res) => {
             return res.status(400).json( {error: "Пароль содержит один или несколько запрещенных символов"} );
         };
 
-        if(username.length < 3 || username.length > 45){
-            return res.status(400).json({ error: "Имя пользователя должно быть от 3 до 45 символов включительно" });
+        if(username.length < 3 || username.length > 15){
+            return res.status(400).json({ error: "Имя пользователя должно быть от 3 до 15 символов включительно" });
         };
 
         if(forbiddenChars.test(username)) {

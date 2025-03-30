@@ -29,7 +29,7 @@ export default function ImageGallery({ thumbnails }) {
     useEffect(() => {
             const timeout = setTimeout(() => {
                checkScroll(); 
-            }, 20);
+            }, 50);
             
             return () => clearTimeout(timeout);
     }, []);

@@ -3,18 +3,23 @@ import userCirlcle from "../assets/user-circle-svgrepo-com.svg";
 import styles from "./Header.module.css";
 import SideBarMenu from "../SideBarMenu/SideBarMenu.jsx";
 import Cookies from "js-cookie";
-import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
 
 export default function Header(){
 
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
     const [isEnterModalOpen, setIsEnterModalOpen] = useState(false);
-    const [isUserLogedIn, setIsUserLogedIn] = useState(false);
     const [isMiniAccountModalOpen, setIsMiniAccountModalOpen] = useState(false);
+    const [isUserLogedIn, setIsUserLogedIn] = useState(false);
+    const miniAccountModalRef = useRef(null);
+    const enterModalRef = useRef(null);
+
+    const location = useLocation();
 
     const openSignInModal = () => {
+        setIsEnterModalOpen(false);
         setIsSignInModalOpen(true);
     };
 
@@ -31,6 +36,7 @@ export default function Header(){
     };
 
     const openLoginModal = () => {
+        setIsEnterModalOpen(false);
         setIsLoginModalOpen(true);
     };
 
@@ -68,6 +74,40 @@ export default function Header(){
         console.log(allCookies);
         
     }, []);
+
+    /* Handle closure of every modal when redirected to other page */
+
+    useEffect(() => {
+        setIsLoginModalOpen(false);
+        setIsSignInModalOpen(false);
+        setIsEnterModalOpen(false);
+        setIsMiniAccountModalOpen(false);
+    }, [location.pathname]);
+
+    /* Handle click outside of modals to close them */
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+
+            const isEnterButton = event.target.closest(`.${styles.enterButton}`);
+
+            if (!isEnterButton &&
+            miniAccountModalRef.current && !miniAccountModalRef.current.contains(event.target) ||
+            (enterModalRef.current && !enterModalRef.current.contains(event.target))) {
+                setIsMiniAccountModalOpen(false);
+                setIsEnterModalOpen(false);
+            }
+        }
+
+        if (isMiniAccountModalOpen || isEnterModalOpen) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+        else {
+            document.removeEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [isMiniAccountModalOpen, isEnterModalOpen]);
 
     // Register user on submit
     const handleRegisterFormSubmit = async (e) => {
@@ -173,11 +213,12 @@ export default function Header(){
                     {!isUserLogedIn &&
                         <div className={styles.enterWrapper}>
                             <button className={styles.enterButton} onClick={isEnterModalOpen ? closeEnterModal : openEnterModal}>
-                                <img src={userCirlcle} alt="Войти" /><br />Вход
+                                <img src={userCirlcle} alt="Войти" />
+                                <span>Вход</span>
                             </button> 
                             <div>
                                 {isEnterModalOpen &&
-                                    <div className={styles.modalWindowEnter}>
+                                    <div className={styles.modalWindowEnter} ref={enterModalRef}>
                                         <div className={styles.modalWindowEnterContent}>
                                             <button onClick={openLoginModal}>Войти</button>
                                             <button onClick={openSignInModal}>Регистрация</button>
@@ -197,11 +238,12 @@ export default function Header(){
                     {isUserLogedIn &&
                         <div className={styles.enterWrapper}>
                             <button className={styles.enterButton} onClick={isMiniAccountModalOpen ? closeMiniAccountModal : openMiniAccountModal}>
-                                <img src={userCirlcle} alt="Войти" /><br />Аккаунт
+                                <img src={userCirlcle} alt="Профиль" />
+                                <span>Борис</span>
                             </button>
                             <div>
                                 {isMiniAccountModalOpen &&
-                                    <div className={styles.modalWindowEnter}>
+                                    <div className={styles.modalWindowEnter} ref={miniAccountModalRef}>
                                         <div className={styles.modalWindowEnterContent}>
                                             <button>
                                                 <Link to={"/profile"}>

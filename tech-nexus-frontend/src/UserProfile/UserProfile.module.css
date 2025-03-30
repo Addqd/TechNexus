@@ -43,6 +43,10 @@
     background-color: hsl(0, 0%, 80%);
 }
 
+.activeSection {
+    background-color: hsl(0, 0%, 80%);
+}
+
 .mainPicWrapper{
     user-select: none;
 }
@@ -57,4 +61,20 @@
 
 .renderArea{
     font-size: 20px;
+}
+
+.returnBackBtn{
+    width: auto;
+    height: 30px;
+    align-self: flex-start;
+    margin-right: 5px;
+    border-radius: 5px;
+    border: none;
+    background-color: hsl(0, 5%, 85%);
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+
+.returnBackBtn:hover{
+    background-color: hsl(0, 0%, 70%);
 }

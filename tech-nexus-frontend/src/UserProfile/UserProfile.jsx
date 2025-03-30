@@ -1,9 +1,21 @@
 import styles from "./UserProfile.module.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 
 export default function UserProfile () {
 
+    const navigate = useNavigate();
+
     const [selectedSection, setSelectedSection] = useState("profile");
+
+    useEffect(() => {
+        const isUserLoggedIn = Cookies.get("isUserLoggedIn");
+
+        if (!isUserLoggedIn) {
+            navigate("/");
+        }
+    }, []);
 
     const sections = [
         {id: "profile", label: "Профиль"},
@@ -13,6 +25,10 @@ export default function UserProfile () {
         {id: "brand", label: "Ваш бренд"},
         {id: "payment", label: "Способ оплаты"}
     ];
+
+    const handleGoBack = () => {
+        navigate(-1);
+    };
 
     const renderSection = (section) => {
         switch (section) {
@@ -75,6 +91,13 @@ export default function UserProfile () {
         }
     };
 
+    /* IMPROVE PROTECTION. 
+       Add check on wether isUserLoggedIn in cookies or not AT ALL to EVEN render the component 
+       Why is it nececcery? Basicaly, when app will be deployed on server
+       IT IS (I GUESS) possible, that when user is pressing on btn in his browser to go back
+       (tiny arrow close to address bar) IT ACTUALY CAN let him back in his profile, even
+       IF HE IS NOT LOGGED IN. So that's potential seccurity threat.*/
+
     return (
         <>
             <div className={styles.userProfileWrapper}>
@@ -82,10 +105,13 @@ export default function UserProfile () {
                 {/* Sections sidebar */}
 
                 <div className={styles.sectionsWrapper}>
+                    <button className={styles.returnBackBtn} onClick={handleGoBack}>
+                        Назад
+                    </button>
                     {sections.map((section) => (
                         <div
                             key={section.id}
-                            className={styles.section}
+                            className={`${styles.section} ${selectedSection === section.id ? styles.activeSection : ""}`}
                             onClick={() => setSelectedSection(section.id)}
                         >
                             {section.label}
