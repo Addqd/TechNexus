@@ -1,13 +1,15 @@
 import styles from "./UserProfile.module.css";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 
 export default function UserProfile () {
 
     const navigate = useNavigate();
+    const { user_id } = useParams();
 
     const [selectedSection, setSelectedSection] = useState("profile");
+    const [fullUserProfile, setFullUserProfile] = useState(null);
 
     useEffect(() => {
         const isUserLoggedIn = Cookies.get("isUserLoggedIn");
@@ -15,6 +17,26 @@ export default function UserProfile () {
         if (!isUserLoggedIn) {
             navigate("/");
         }
+    }, []);
+
+    useEffect(() => {
+        const fetchUserProfile = async () => {
+            try{
+                const response = await fetch(`http://localhost:8000/profile/${user_id}`);
+
+                if(!response.ok){
+                    throw new Erorr("Fetch wasn't ok");
+                }
+                const data = await response.json();
+                
+                setFullUserProfile(data);
+            }
+            catch(error){
+                console.error(error);
+            }
+        }
+
+        fetchUserProfile();
     }, []);
 
     const sections = [
@@ -36,12 +58,12 @@ export default function UserProfile () {
                 return (
                     <>
                         <div className={styles.mainPicWrapper}>
-                           <img className={styles.mainPic} src="/images/testImage.jpg" alt="Изображение профиля" /> 
+                           <img className={styles.mainPic} src={fullUserProfile.profile_img || `/images/testImage.jpg`} alt="Изображение профиля" /> 
                         </div>
-                        <span>Username</span>
-                        <span>Баланс 100</span>
-                        <span>Продавец ли?</span>
-                        <span>Адресс доставки</span>
+                        <span>{fullUserProfile.username}</span>
+                        <span>Баланс {fullUserProfile.balance}₽</span>
+                        <span>Продавец ли? {fullUserProfile.is_seller ? "Да" : "Нет"}</span>
+                        <span>Адресс доставки: {fullUserProfile.shipping_address === null ? "Не указан" : fullUserProfile.shipping_address}</span>
                         <span>Редактировать профиль</span>
                     </>
                 );
@@ -91,6 +113,10 @@ export default function UserProfile () {
                 return null;
         }
     };
+
+    if (!fullUserProfile) {
+        return <div>Loading...</div>;
+    }
 
     /* IMPROVE PROTECTION. 
        Add check on wether isUserLoggedIn in cookies or not AT ALL to EVEN render the component 

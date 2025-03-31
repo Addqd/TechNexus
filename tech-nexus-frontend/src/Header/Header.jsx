@@ -268,7 +268,7 @@ export default function Header(){
                                     <div className={styles.modalWindowEnter} ref={miniAccountModalRef}>
                                         <div className={styles.modalWindowEnterContent}>
                                             <button>
-                                                <Link to={"/profile"}>
+                                                <Link to={`/profile/${Cookies.get("userId")}`}>
                                                     Профиль
                                                 </Link>
                                             </button>

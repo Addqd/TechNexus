@@ -26,7 +26,7 @@ export default function App() {
               <Route path="/product/:id" element={<ProductPage />}/>
 
               {/* User profile */}
-              <Route path="/profile" element={<UserProfile/>}/>
+              <Route path="/profile/:user_id" element={<UserProfile/>}/>
 
             </Routes>
           </div>

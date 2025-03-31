@@ -199,6 +199,34 @@ app.get("/mini_profile/:user_id", async (req, res) => {
     }
 });
 
+// Route for main user profile by id
+
+app.get("/profile/:user_id", async (req, res) => {
+    try {
+        const { user_id } = req.params;
+        
+        const userProfile = await pool.query(`SELECT 
+                                                id,
+                                                username,
+                                                is_seller,
+                                                profile_img,
+                                                shipping_address,
+                                                balance
+                                                FROM users WHERE id = $1`, [user_id]);
+
+        if (userProfile.rows.length === 0) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        res.json(userProfile.rows[0]);
+
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Code 500 (Server error)" });
+    }
+});
+
 app.listen(8000, () => {
     console.log("Server is listenning on port 8000");
 });
