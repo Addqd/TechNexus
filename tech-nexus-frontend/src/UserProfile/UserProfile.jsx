@@ -75,6 +75,7 @@ export default function UserProfile () {
                             <img className={styles.mainPic} src="/images/testImage.jpg" alt="Изображение бренда" />
                         </div>
                         <span>Brand name</span>
+                        <span>Заказы клиентов</span>
                         <span>Отзывы клиентов</span>
                         <span>Создать товар</span>
                         <span>Product card goes here, all brand's products</span>

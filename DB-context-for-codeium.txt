@@ -1,0 +1,129 @@
+БАЗА ДАННЫХ technexus
+
+Таблицы:
+
+attribute_values
+
+    id (integer, primary key, auto increment, not null)
+    attribute_name_id (intger, foreign key to attributes.id, not null)
+    attribute_value (varchar (255), not null)
+
+attributes
+
+    id (integer, primary key, auto increment, not null)
+    category_name_id (intger, foreign key to categories.id, not null)
+    attribute (varchar (255), not null)
+
+brands
+
+    id (integer, primary key, auto increment, not null)
+    user_id (integer, foreign key to users.id, not null)
+    brand_name (varchar (255), not null)
+
+categories
+
+    id (integer, primary key, auto increment, not null)
+    master_category_name_id (integer, foreign key to maseter_categories.id, not null)
+    category_name (varchar (255), not null)
+
+maseter_categories
+
+    id (integer, primary key, auto increment, not null)
+    master_category_name (varchar (255), not null)
+
+orders
+
+    id (integer, primary key, auto increment, not null)
+    product_id (integer, foreign key to products.id, not null)
+    user_id (integer, foreign key to users.id, not null)
+    amount (integer, not null)
+    courier_delivery (boolean, dafault false)
+    pickup_point_id (integer, foreign key to pickup_points.id, not null)
+    status (varchar (120), not null)
+
+payment
+
+    id (integer, primary key, auto increment, not null)
+    user_id (integer, foreign key to users.id, not null)
+    card_number (varchar (16), not null)
+    payment_network_id (integer, foreign key to payment_networks.id)
+    cardholder_name (varchar (150), not null)
+    expiration_date (varchar (7), not null)
+    cvv (varchar (3), not null)
+    date_registered (timestamp without time zone, dafault current timestamp)
+
+payment_networks
+
+    id (integer, primary key, auto increment, not null)
+    payment_network (varchar (30), not null)
+
+pickup_points
+
+    id (integer, primary key, auto increment, not null)
+    pickup_point_location (varchar (400), not null)
+
+product_attributes
+
+    product_id (integer, primary key, foreign key to products.id, not null)
+    attribute_value_id (integer, primary key, foreign key to attribute_values.id, not null)
+
+product_imgs
+
+    id (integer, primary key, auto increment, not null)
+    product_id (integer, foreign key to products.id, not null)
+    img_url (varchar (255), not null)
+    is_main (boolean, dafault false)
+
+product_vids
+
+    id (integer, primary key, auto increment, not null)
+    product_id (integer, foreign key to products.id, not null)
+    video_url (varchar (400), not null)
+
+products
+
+    id (integer, primary key, auto increment, not null)
+    product_name (varchar (255), not null)
+    producer_id (integer, foreign key to producers.id, not null)
+    brand_name_id (integer, foreign key to brands.id, not null)
+    amount_in_stock (integer, not null)
+    price (integer, not null)
+    date_registered (timestamp without time zone, default current timestamp)
+    category_name_id (integer, foreign key to categories.id, not null)
+    description (varchar (2000))
+
+review_imgs
+
+    id (integer, primary key, auto increment, not null)
+    review_id (integer, foreign key to reviews.id, not null)
+    img_url (varchar (400), not null)
+
+review_vids
+
+    id (integer, primary key, auto increment, not null)
+    review_id (integer, foreign key to reviews.id, not null)
+    video_url (varchar (400), not null)
+
+reviews
+
+    id (integer, primary key, auto increment, not null)
+    user_id (integer, foreign key to users.id, not null)
+    review_text (varchar (1000), not_null)
+    rating (integer)
+    date_created (date, default CURRENT_DATE)
+
+users
+
+    id (integer, primary key, auto increment, not null)
+    username (varchar (255), not null)
+    email (varchar (255), not null)
+    password (varchar (255), not null)
+    registration_date (timestamp without time zone, default current timestamp)
+    is_seller (boolean, default false)
+    profile_img (varchar (400), default null)
+    shipping_address (varchar (400, dafault null))
+
+producers
+
+    id (integer, primary key, auto increment, not null)
+    producer_name (varchar (255), not null)
