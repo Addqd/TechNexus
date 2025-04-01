@@ -2,13 +2,37 @@ import express from "express";
 import cors from "cors";
 import pool from "./db.js";
 import bcrypt from "bcrypt";
+import multer from "multer";
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Dynamic path to imgs
+const imagesDir = path.join(__dirname, "../tech-nexus-frontend/public/images");
 
 const app = express();
 
 //Middleware
 app.use(cors());
 app.use(express.json());
+app.use("/images", express.static(imagesDir)); // Img folder in url
 
+// Storage settings for multer
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, imagesDir);
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname));
+    }
+});
+
+// Middleware for file upload
+const upload = multer({ storage });
+    
 // Route to get all products on start page
 app.get("/", async (req, res) => {
     try {
@@ -206,13 +230,16 @@ app.get("/profile/:user_id", async (req, res) => {
         const { user_id } = req.params;
         
         const userProfile = await pool.query(`SELECT 
-                                                id,
-                                                username,
-                                                is_seller,
-                                                profile_img,
-                                                shipping_address,
-                                                balance
-                                                FROM users WHERE id = $1`, [user_id]);
+                                                u.id,
+                                                u.username,
+                                                u.is_seller,
+                                                u.profile_img,
+                                                u.shipping_address,
+                                                b.brand_name,
+                                                b.brand_img
+                                            FROM users u
+                                            LEFT JOIN brands b ON u.id = b.user_id
+                                            WHERE u.id = $1`, [user_id]);
 
         if (userProfile.rows.length === 0) {
             return res.status(404).json({ error: "User not found" });
@@ -220,6 +247,38 @@ app.get("/profile/:user_id", async (req, res) => {
 
         res.json(userProfile.rows[0]);
 
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Code 500 (Server error)" });
+    }
+});
+
+// ADD REGEX CHECK OF BRAND NAME AND DESCRIPTION, ALSO CHECK FOR LENGTH BOTH OF THEM
+
+// Route for brand creation by user id
+app.post("/create/brand", upload.single("brand_img"), async (req, res) => {
+    try {
+        const { user_id, brand_name, brand_description } = req.body;
+        const brand_img = req.file ? `/images/${req.file.filename}` : null;
+
+        // Creation of new brand
+        const newBrand = await pool.query(
+            `INSERT INTO brands (user_id, brand_name, brand_img, brand_description)
+             VALUES ($1, $2, $3, $4) RETURNING *;`,
+             [user_id, brand_name, brand_img, brand_description]
+        );
+
+        // Update of user is_seller status to true
+        await pool.query(
+            `UPDATE users SET is_seller = true WHERE id = $1;`,
+            [user_id]  
+        );
+
+        res.status(201).json({
+            message: "Бренд успешно создан и статус продавца установлен",
+            brand: newBrand.rows[0]
+        });
     }
     catch (error) {
         console.error(error);

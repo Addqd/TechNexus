@@ -19,6 +19,8 @@ brands
     id (integer, primary key, auto increment, not null)
     user_id (integer, foreign key to users.id, not null)
     brand_name (varchar (255), not null)
+    brand_img (varchar (400), not null)
+    brand_description (varchar (400), not null)
 
 categories
 

@@ -196,7 +196,7 @@ export default function Header(){
             }
         }
         catch (error) {
-            console.error("Ошибка при загрузке милого профиля пользователя", error);
+            console.error("Ошибка при загрузке малого профиля пользователя", error);
         }
     };
 

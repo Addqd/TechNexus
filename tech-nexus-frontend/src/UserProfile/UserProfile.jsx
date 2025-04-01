@@ -10,6 +10,22 @@ export default function UserProfile () {
 
     const [selectedSection, setSelectedSection] = useState("profile");
     const [fullUserProfile, setFullUserProfile] = useState(null);
+    const [isWillingToEditBrand, setIsWillingToEditBrand] = useState(false);
+    const [isWillingToEditProfile, setIsWillingToEditProfile] = useState(false);
+    const [description, setDescription] = useState("");
+
+    const [imgData, setImgData] = useState({
+        fileName: "/images/testImage.jpg",
+        preview: null,
+    });
+
+    const [errors, setErrors] = useState({
+        brandName: false,
+        brandDescription: false,
+    });
+
+    // maxLength for text area
+    const maxLength = 400;
 
     useEffect(() => {
         const isUserLoggedIn = Cookies.get("isUserLoggedIn");
@@ -38,6 +54,77 @@ export default function UserProfile () {
 
         fetchUserProfile();
     }, []);
+
+    // Temoral URL for img path cleaning on unmount
+    useEffect(() => {
+        return () => {
+            if (imgData.preview) {
+                URL.revokeObjectURL(imgData.preview);
+            }
+        };
+    }, []);
+
+
+    // Handle file change when uploading an image
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const objectURL = URL.createObjectURL(file);
+            setImgData({
+                fileName: file.name,
+                preview: objectURL
+            });
+        }
+    };
+
+    const handleDescriptionChange = (e) => {
+        setDescription(e.target.value);
+        setErrors((prev) => ({ ...prev, brandDescription: false }));
+    };
+
+    // Handle register brand form submit
+    const handleCreateBrandFormSubmit = async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append("user_id", user_id);
+        formData.append("brand_name", e.target.brand_name.value.trim());
+        formData.append("brand_description", e.target.brand_description.value.trim());
+        if (imgData.preview) {
+            formData.append("brand_img", e.target.brand_img.files[0]);
+        }
+
+        try {
+            const response = await fetch("http://localhost:8000/create/brand", {
+                method: "POST",
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                window.alert(data.message);
+                window.location.reload();
+            }
+            else {
+                const errorData = await response.json();
+                window.alert(errorData.error);
+            }
+        }
+        catch (error) {
+            console.error(error);
+        }
+
+        const newErrors = {
+            brandName: !e.target.brand_name.value.trim(),
+            brandDescription: !e.target.brand_description.value.trim()
+        };
+
+        setErrors(newErrors);
+
+        if (!newErrors.brandName && !newErrors.brandDescription) {
+            window.alert("Бренд создан");
+        }
+    }
 
     const sections = [
         {id: "profile", label: "Профиль"},
@@ -90,17 +177,79 @@ export default function UserProfile () {
                     </>
                 );
             case "brand": 
+
+                if (!fullUserProfile.is_seller) {
+                    return (
+                        <div>
+                            {!isWillingToEditBrand ? (
+                                <div className={styles.notSeller}>
+                                    <span>Вы не являетесь продавцом.</span>
+                                    <span>Хотите зарегистрировать свой бренд?</span>
+                                    <button onClick={() => setIsWillingToEditBrand(true)}>Зарегистрировать бренд</button> 
+                                </div>
+                            ) : (
+                                <form className={styles.brandCreateForm} onSubmit={handleCreateBrandFormSubmit}>
+                                    <button className={styles.returnBackBtn} onClick={() => setIsWillingToEditBrand(false)}>Назад</button>
+                                    <span>Cоздание бренда</span>
+            
+                                    <span>Изображение бренда</span>
+
+                                    <div style={{ userSelect: "none" }}>
+                                        <img className={styles.mainPic} src={imgData.preview || `/images/testImage.jpg`} alt="Превью изображеня бренда"/>
+                                    </div>
+                                    <span>{imgData.fileName === "/images/testImage.jpg" ? "Файл не выбран" : imgData.fileName}</span>
+                                    <label className={styles.fileUploadLabel}>
+                                        Выбрать изображение
+                                        <input 
+                                            type="file"
+                                            name="brand_img"
+                                            onChange={handleFileChange}
+                                            className={styles.hiddenFileInput} 
+                                        />
+                                    </label>
+
+                                    <span>Название бренда</span>
+                                    <input 
+                                        type="text" 
+                                        name="brand_name" 
+                                        placeholder="Введите название бренда"
+                                        onChange={() => setErrors((prev) => ({ ...prev, brandName: false }))}
+                                        className={errors.brandName ? styles.errorBorder : ""}
+                                    />
+                                    <span>Описание бренда</span>
+                                    <div className={styles.textareaContainer}>
+                                        <textarea 
+                                            name="brand_description"
+                                            placeholder="Введите описание бренда"
+                                            rows='5'
+                                            cols='50'
+                                            maxLength={maxLength}
+                                            value={description}
+                                            onChange={handleDescriptionChange}
+                                            className={errors.brandDescription ? styles.errorBorder : ""}
+                                        />
+                                        <span className={styles.charCount}>
+                                            {description.length}/{maxLength}
+                                        </span>    
+                                    </div>
+                                    <button className={styles.createBrandButton} type="submit">Создать бренд</button>
+                                </form>   
+                            )}
+                        </div>
+                    )
+                }
+                
                 return (
                     <>
-                        <span>Create a brand if not registered</span>
                         <div className={styles.mainPicWrapper}>
-                            <img className={styles.mainPic} src="/images/testImage.jpg" alt="Изображение бренда" />
+                            <img className={styles.mainPic} src={fullUserProfile.brand_img || `/images/testImage.jpg`} alt="Изображение бренда" />
                         </div>
-                        <span>Brand name</span>
+                        <span>{fullUserProfile.brand_name}</span>
                         <span>Заказы клиентов</span>
                         <span>Отзывы клиентов</span>
+                        <span>Товары бренда</span>
                         <span>Создать товар</span>
-                        <span>Product card goes here, all brand's products</span>
+                        <span>Редактировать бренд</span>
                     </>
                 );
             case "payment":
