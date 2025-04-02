@@ -235,6 +235,7 @@ app.get("/profile/:user_id", async (req, res) => {
                                                 u.is_seller,
                                                 u.profile_img,
                                                 u.shipping_address,
+                                                u.balance,
                                                 b.brand_name,
                                                 b.brand_img
                                             FROM users u

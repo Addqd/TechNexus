@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 
+/* FIX CLASSES, DELETE THEM, INSERT THEM MANUALY */
+
 export default function UserProfile () {
 
     const navigate = useNavigate();
@@ -144,36 +146,45 @@ export default function UserProfile () {
             case "profile":
                 return (
                     <>
-                        <div className={styles.mainPicWrapper}>
-                           <img className={styles.mainPic} src={fullUserProfile.profile_img || `/images/testImage.jpg`} alt="Изображение профиля" /> 
+                        <div className={styles.profile}>
+                            <div className={styles.mainPicWrapper}>
+                            <img className={styles.mainPic} src={fullUserProfile.profile_img || `/images/testImage.jpg`} alt="Изображение профиля" /> 
+                            </div>
+                            <span>{fullUserProfile.username}</span>
+                            <span>Баланс: {fullUserProfile.balance}₽</span> 
+                            <span>Бренд: {fullUserProfile.is_seller ? fullUserProfile.brand_name : "Нет бренда"}</span>
+                            <span>Адресс доставки: {fullUserProfile.shipping_address === null ? "Не указан" : fullUserProfile.shipping_address}</span>
+                            <button>Редактировать профиль</button>
                         </div>
-                        <span>{fullUserProfile.username}</span>
-                        <span>Баланс {fullUserProfile.balance}₽</span>
-                        <span>Продавец ли? {fullUserProfile.is_seller ? "Да" : "Нет"}</span>
-                        <span>Адресс доставки: {fullUserProfile.shipping_address === null ? "Не указан" : fullUserProfile.shipping_address}</span>
-                        <span>Редактировать профиль</span>
+                        
                     </>
                 );
             case "orders": 
                 return (
                     <>
-                        <span>Product card goes here</span>
-                        <span>Status of the purchase</span>
-                        <span>Approximate date of arrival</span>
+                        <div className={styles.orders}>
+                            <span>Product card goes here</span>
+                            <span>Status of the purchase</span>
+                            <span>Approximate date of arrival</span>
+                        </div>
                     </>
                 );
             case "history":
                 return (
                     <>
-                        <span>Product card goes here</span>
-                        <span>Rewiev, if never reviewed: Provide an option to do so</span>
+                        <div className={styles.history}>
+                            <span>Product card goes here</span>
+                            <span>Rewiev, if never reviewed: Provide an option to do so</span>
+                        </div>
                     </>
                 );
             case "favorites":
                 return (
                     <>
-                        <span>Product card goes here</span>
-                        <span>Is in stock, if true - it's ammount</span>
+                        <div className={styles.favorites}>
+                            <span>Product card goes here</span>
+                            <span>Is in stock, if true - it's ammount</span>
+                        </div>
                     </>
                 );
             case "brand": 
@@ -241,21 +252,24 @@ export default function UserProfile () {
                 
                 return (
                     <>
-                        <div className={styles.mainPicWrapper}>
-                            <img className={styles.mainPic} src={fullUserProfile.brand_img || `/images/testImage.jpg`} alt="Изображение бренда" />
+                        <div className={styles.brand}>
+                            <div className={styles.mainPicWrapper}>
+                                <img className={styles.mainPic} src={fullUserProfile.brand_img || `/images/testImage.jpg`} alt="Изображение бренда" />
+                            </div>
+                            <span>{fullUserProfile.brand_name}</span>
+                            <button>Заказы клиентов</button>
+                            <button>Товары бренда</button>
+                            <button>Создать товар</button>
+                            <button>Редактировать бренд</button>    
                         </div>
-                        <span>{fullUserProfile.brand_name}</span>
-                        <span>Заказы клиентов</span>
-                        <span>Отзывы клиентов</span>
-                        <span>Товары бренда</span>
-                        <span>Создать товар</span>
-                        <span>Редактировать бренд</span>
                     </>
                 );
             case "payment":
                 return (
                     <>
-                        <span>Cool looking box like banking card, with registration</span>
+                        <div className={styles.payment}>
+                            <span>Cool looking box like banking card, with registration</span>
+                        </div>
                     </>
                 );
             default:
@@ -301,7 +315,7 @@ export default function UserProfile () {
                     {sections.map((section) => (
                         <div
                             key={section.id}
-                            className={`${styles.optionWrapper} ${styles[section.id]} ${selectedSection === section.id ? styles.active : ""}`}
+                            className={`${styles.optionWrapper} ${selectedSection === section.id ? styles.active : ""}`}
                         >
                             {renderSection(section.id)}
                         </div>

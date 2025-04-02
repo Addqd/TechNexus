@@ -275,7 +275,7 @@ export default function Header(){
                                             <button>Заказы</button>
                                             <button>Баланс</button>
                                             <button>Избранное</button>
-                                            <button>Купленные товары</button>
+                                            <button>История</button>
                                             <button onClick={logOut}>Выйти</button>
                                         </div>
                                     </div>

@@ -13,9 +13,6 @@
 
 .optionWrapper {
     display: none;
-   /*  border: none;
-    border-radius: 5px;
-    background-color: hsl(0, 0%, 85%); */
 }
 
 .optionWrapper.active {
@@ -166,6 +163,60 @@
     box-shadow: 1px 1px 5px hsl(0, 0%, 80%);
     padding: 7px;
     width: auto;
+}
+
+.profile {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile button {
+    width: auto;
+    align-self: center;
+    font-size: 20px;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: hsl(0, 0%, 85%);
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+    font-family: 'Times New Roman', Times, serif;
+    margin-top: 4px;
+    user-select: none;
+}
+
+.profile button:hover{
+    background-color: hsl(0, 0%, 70%);
+}
+
+.brand {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+}
+
+.brand button {
+    width: auto;
+    align-self: center;
+    font-size: 20px;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: hsl(0, 0%, 85%);
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+    font-family: 'Times New Roman', Times, serif;
+    margin-top: 4px;
+    user-select: none;
+}
+
+.brand button:hover{
+    background-color: hsl(0, 0%, 70%);
 }
 
 .returnBackBtn{
