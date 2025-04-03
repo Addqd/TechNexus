@@ -3,12 +3,14 @@ import cors from "cors";
 import pool from "./db.js";
 import bcrypt from "bcrypt";
 import multer from "multer";
+import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const forbiddenChars = /["'`;<>\\\n\r\t\b\f]|\/\*|\*\//;
 
 // Dynamic path to imgs
 const imagesDir = path.join(__dirname, "../tech-nexus-frontend/public/images");
@@ -112,7 +114,6 @@ app.get("/products/:id", async (req, res) => {
 app.post("/register", async (req, res) => {
     try {
         const { username, email, password } = req.body;
-        const forbiddenChars = /["'`;<>\\\n\r\t\b\f]|\/\*|\*\//;
         const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/;
 
         if(!username || !email || !password) {
@@ -237,7 +238,8 @@ app.get("/profile/:user_id", async (req, res) => {
                                                 u.shipping_address,
                                                 u.balance,
                                                 b.brand_name,
-                                                b.brand_img
+                                                b.brand_img,
+                                                b.brand_description
                                             FROM users u
                                             LEFT JOIN brands b ON u.id = b.user_id
                                             WHERE u.id = $1`, [user_id]);
@@ -261,6 +263,19 @@ app.get("/profile/:user_id", async (req, res) => {
 app.post("/create/brand", upload.single("brand_img"), async (req, res) => {
     try {
         const { user_id, brand_name, brand_description } = req.body;
+
+        if (forbiddenChars.test(brand_name) || forbiddenChars.test(brand_description)) {
+            return res.status(400).json({ error: "Название бренда или описание содержит один или несколько запрещенных символов" });
+        }
+
+        if (brand_name.length < 4 || brand_name.length > 15) {
+            return res.status(400).json({ error: "Название бренда должно быть от 4 до 15 символов включительно" });
+        }
+
+        if (brand_description.length > 400) {
+            return res.status(400).json({ error: "Описание бренда не должно превышать 400 символов" });
+        }
+
         const brand_img = req.file ? `/images/${req.file.filename}` : null;
 
         // Creation of new brand
@@ -281,6 +296,103 @@ app.post("/create/brand", upload.single("brand_img"), async (req, res) => {
             brand: newBrand.rows[0]
         });
     }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Code 500 (Server error)" });
+    }
+});
+
+// Rout for updating brand information by user_id
+app.put("/update/brand", upload.single("brand_img"), async (req, res) => {
+    try {
+        const { user_id, brand_name, brand_description } = req.body;
+
+        const brand_img = req.file ? `/images/${req.file.filename}` : null;
+
+        const currentBrand = await pool.query(
+            `SELECT brand_name, brand_description, brand_img FROM brands WHERE user_id = $1`,
+            [user_id]
+        );
+
+        if (currentBrand.rows.length === 0) {
+            return res.status(404).json({ error: "Бренд не найден" });
+        }
+
+        const { brand_name: currentName, brand_description: currentDescription, brand_img: currentImg } = currentBrand.rows[0];
+
+        // Check if AT LEAST one of the fields is updated
+        if (
+            (!brand_name || brand_name === currentName) &&
+            (!brand_description || brand_description === currentDescription) &&
+            (!brand_img || brand_img === currentImg)
+        ) {
+            return res.status(400).json( {error: "Необходимо изменить хотя бы одно поле для обновления" } );
+        }
+
+        if (forbiddenChars.test(brand_name) || forbiddenChars.test(brand_description)) {
+            return res.status(400).json({ error: "Название бренда или описание содержит один или несколько запрещенных символов" });
+        }
+
+        if (brand_name && (brand_name.length < 4 || brand_name.length > 15)) {
+            return res.status(400).json({ error: "Название бренда должно быть от 4 до 15 символов включительно" });
+        }
+
+        if (brand_description.length > 400) {
+            return res.status(400).json({ error: "Описание бренда не должно превышать 400 символов" });
+        }
+
+        console.log(`NEW IMG: ${brand_img}`);
+        console.log(`Current img: ${currentImg}`);
+
+        // IF brand_img is updated DELETE the old one
+        if (brand_img && currentImg && brand_img !== currentImg) {
+            const editedCurrentImg = currentImg.replace(/^\/images\//, '');
+
+            const oldImagePath = path.join(__dirname, "..", "tech-nexus-frontend", "public", "images", editedCurrentImg);
+
+            console.log(`Old image path: ${oldImagePath}`);
+
+            if (fs.existsSync(oldImagePath)) {
+                fs.unlinkSync(oldImagePath);
+            }
+        }
+        else {
+            console.log("ELSE");
+        }
+
+        // Dynamic query for updating brand
+        const updates = [];
+        const values = [];
+        let index = 1;
+
+        if (brand_name && brand_name !== currentName) {
+            updates.push(`brand_name = $${index}`);
+            values.push(brand_name);
+            index++;
+        }
+
+        if (brand_description && brand_description !== currentDescription) {
+            updates.push(`brand_description = $${index}`);
+            values.push(brand_description);
+            index++;
+        }
+
+        if (brand_img && brand_img !== currentImg) {
+            updates.push(`brand_img = $${index}`);
+            values.push(brand_img);
+            index++;
+        }
+
+        const updateQuery = `UPDATE brands SET ${updates.join(", ")} WHERE user_id = ${user_id} RETURNING *;`;
+
+        const updatedBrand = await pool.query(updateQuery, values);
+
+        res.status(200).json({
+            message: "Бренд успешно обновлен",
+            brand: updatedBrand.rows[0]
+        });
+
+    }   
     catch (error) {
         console.error(error);
         res.status(500).json({ error: "Code 500 (Server error)" });

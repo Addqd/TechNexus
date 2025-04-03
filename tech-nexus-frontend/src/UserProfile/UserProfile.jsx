@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 
-/* FIX CLASSES, DELETE THEM, INSERT THEM MANUALY */
+/* FIX VALUE = {} ON EVERY STATE OF DESC NAME EXCEPT EDIT. 
+   or not... */
 
 export default function UserProfile () {
 
@@ -15,6 +16,7 @@ export default function UserProfile () {
     const [isWillingToEditBrand, setIsWillingToEditBrand] = useState(false);
     const [isWillingToEditProfile, setIsWillingToEditProfile] = useState(false);
     const [description, setDescription] = useState("");
+    const [brandName, setBrandName] = useState("");
 
     const [imgData, setImgData] = useState({
         fileName: "/images/testImage.jpg",
@@ -48,6 +50,13 @@ export default function UserProfile () {
                 const data = await response.json();
                 
                 setFullUserProfile(data);
+                setBrandName(data.brand_name);
+                setDescription(data.brand_description);
+                setImgData({
+                    fileName: data.brand_img,
+                    preview: data.brand_img
+                });
+
             }
             catch(error){
                 console.error(error);
@@ -84,6 +93,10 @@ export default function UserProfile () {
         setErrors((prev) => ({ ...prev, brandDescription: false }));
     };
 
+    const handleBrandNameChange = (e) => {
+        setBrandName(e.target.value);
+    };
+
     // Handle register brand form submit
     const handleCreateBrandFormSubmit = async (e) => {
         e.preventDefault();
@@ -111,6 +124,8 @@ export default function UserProfile () {
                 const errorData = await response.json();
                 window.alert(errorData.error);
             }
+
+            setIsWillingToEditBrand(false);
         }
         catch (error) {
             console.error(error);
@@ -125,6 +140,47 @@ export default function UserProfile () {
 
         if (!newErrors.brandName && !newErrors.brandDescription) {
             window.alert("Бренд создан");
+        }
+    }
+
+    const handleEditBrandFormSubmit = async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append("user_id", user_id);
+        formData.append("brand_name", e.target.brand_name.value.trim());
+        formData.append("brand_description", e.target.brand_description.value.trim());
+        if (imgData.preview) {
+            formData.append("brand_img", e.target.brand_img.files[0]);
+        }
+
+        try {
+            const response = await fetch("http://localhost:8000/update/brand", {
+                method: "PUT",
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (
+                    ((formData.get("brand_name") === data.brand_name)) &&
+                    ((formData.get("brand_description") === data.brand_description)) &&
+                    ((formData.get("brand_img") === data.brand_img))
+                ) {
+                    window.alert(data.error);
+                }
+                else {
+                    window.alert(data.message);
+                    window.location.reload();
+                }
+            }
+            else {
+                const errorData = await response.json();
+                window.alert(errorData.error);
+            }
+        }
+        catch (error) {
+            console.error(error);
         }
     }
 
@@ -199,7 +255,7 @@ export default function UserProfile () {
                                     <button onClick={() => setIsWillingToEditBrand(true)}>Зарегистрировать бренд</button> 
                                 </div>
                             ) : (
-                                <form className={styles.brandCreateForm} onSubmit={handleCreateBrandFormSubmit}>
+                                <form className={styles.brandAndProfileForms} onSubmit={handleCreateBrandFormSubmit}>
                                     <button className={styles.returnBackBtn} onClick={() => setIsWillingToEditBrand(false)}>Назад</button>
                                     <span>Cоздание бренда</span>
             
@@ -252,15 +308,69 @@ export default function UserProfile () {
                 
                 return (
                     <>
-                        <div className={styles.brand}>
-                            <div className={styles.mainPicWrapper}>
-                                <img className={styles.mainPic} src={fullUserProfile.brand_img || `/images/testImage.jpg`} alt="Изображение бренда" />
-                            </div>
-                            <span>{fullUserProfile.brand_name}</span>
-                            <button>Заказы клиентов</button>
-                            <button>Товары бренда</button>
-                            <button>Создать товар</button>
-                            <button>Редактировать бренд</button>    
+                        <div>
+                            {!isWillingToEditBrand ? (
+                                <div className={styles.brand}>
+                                    <div className={styles.mainPicWrapper}>
+                                        <img className={styles.mainPic} src={fullUserProfile.brand_img || `/images/testImage.jpg`} alt="Изображение бренда" />
+                                    </div>
+                                    <span>{fullUserProfile.brand_name}</span>
+                                    <span>Описание бренда</span>
+                                    <span className={styles.brandDescription}>{fullUserProfile.brand_description}</span>
+                                    <button>Заказы клиентов</button>
+                                    <button>Товары бренда</button>
+                                    <button>Создать товар</button>
+                                    <button onClick={() => setIsWillingToEditBrand(true)}>Редактировать бренд</button>    
+                                </div>   
+                            ) : (
+                                <form className={styles.brandAndProfileForms} onSubmit={handleEditBrandFormSubmit}>
+                                    <button className={styles.returnBackBtn} onClick={() => setIsWillingToEditBrand(false)}>Назад</button>
+                                    <span>Редактирование бренда</span>
+            
+                                    <span>Изображение бренда</span>
+
+                                    <div style={{ userSelect: "none" }}>
+                                        <img className={styles.mainPic} src={imgData.preview || `/images/testImage.jpg`} alt="Превью изображеня бренда"/>
+                                    </div>
+                                    <span>{imgData.fileName === "/images/testImage.jpg" ? "Файл не выбран" : imgData.fileName}</span>
+                                    <label className={styles.fileUploadLabel}>
+                                        Выбрать изображение
+                                        <input 
+                                            type="file"
+                                            name="brand_img"
+                                            onChange={handleFileChange}
+                                            className={styles.hiddenFileInput} 
+                                        />
+                                    </label>
+
+                                    <span>Название бренда</span>
+                                    <input 
+                                        type="text" 
+                                        name="brand_name" 
+                                        placeholder="Введите название бренда"
+                                        value={brandName}
+                                        onChange={handleBrandNameChange}
+                                        className={errors.brandName ? styles.errorBorder : ""}
+                                    />
+                                    <span>Описание бренда</span>
+                                    <div className={styles.textareaContainer}>
+                                        <textarea 
+                                            name="brand_description"
+                                            placeholder="Введите описание бренда"
+                                            rows='5'
+                                            cols='50'
+                                            maxLength={maxLength}
+                                            value={description}
+                                            onChange={handleDescriptionChange}
+                                            className={errors.brandDescription ? styles.errorBorder : ""}
+                                        />
+                                        <span className={styles.charCount}>
+                                            {description.length}/{maxLength}
+                                        </span>    
+                                    </div>
+                                    <button className={styles.createBrandButton} type="submit">Изменить бренд</button>
+                                </form>   
+                            )}
                         </div>
                     </>
                 );
