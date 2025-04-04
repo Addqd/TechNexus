@@ -3,9 +3,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 
-/* FIX VALUE = {} ON EVERY STATE OF DESC NAME EXCEPT EDIT. 
-   or not... */
-
 export default function UserProfile () {
 
     const navigate = useNavigate();
@@ -15,6 +12,8 @@ export default function UserProfile () {
     const [fullUserProfile, setFullUserProfile] = useState(null);
     const [isWillingToEditBrand, setIsWillingToEditBrand] = useState(false);
     const [isWillingToEditProfile, setIsWillingToEditProfile] = useState(false);
+    const [isWillingToDeleteBrand, setIsWillingToDeleteBrand] = useState(false);
+    const [isEditFormChanged, setIsEditFormChanged] = useState(false);
     const [description, setDescription] = useState("");
     const [brandName, setBrandName] = useState("");
 
@@ -24,8 +23,7 @@ export default function UserProfile () {
     });
 
     const [errors, setErrors] = useState({
-        brandName: false,
-        brandDescription: false,
+        brandName: false
     });
 
     // maxLength for text area
@@ -51,7 +49,7 @@ export default function UserProfile () {
                 
                 setFullUserProfile(data);
                 setBrandName(data.brand_name);
-                setDescription(data.brand_description);
+                setDescription(data.brand_description ? data.brand_description : "");
                 setImgData({
                     fileName: data.brand_img,
                     preview: data.brand_img
@@ -75,6 +73,15 @@ export default function UserProfile () {
         };
     }, []);
 
+    useEffect(() => {
+       if (!fullUserProfile) return;
+       
+        const nameChanged = brandName !== fullUserProfile.brand_name;
+        const descChanged = description !== fullUserProfile.brand_description;
+        const imgChanged = imgData.fileName !== fullUserProfile.brand_img;
+
+        setIsEditFormChanged(nameChanged || descChanged || imgChanged);
+    }, [brandName, description, imgData, fullUserProfile]);
 
     // Handle file change when uploading an image
     const handleFileChange = (e) => {
@@ -90,7 +97,6 @@ export default function UserProfile () {
 
     const handleDescriptionChange = (e) => {
         setDescription(e.target.value);
-        setErrors((prev) => ({ ...prev, brandDescription: false }));
     };
 
     const handleBrandNameChange = (e) => {
@@ -119,13 +125,14 @@ export default function UserProfile () {
                 const data = await response.json();
                 window.alert(data.message);
                 window.location.reload();
+                setIsWillingToEditBrand(false);
             }
             else {
                 const errorData = await response.json();
                 window.alert(errorData.error);
             }
 
-            setIsWillingToEditBrand(false);
+            /* setIsWillingToEditBrand(false); */
         }
         catch (error) {
             console.error(error);
@@ -133,14 +140,10 @@ export default function UserProfile () {
 
         const newErrors = {
             brandName: !e.target.brand_name.value.trim(),
-            brandDescription: !e.target.brand_description.value.trim()
         };
 
         setErrors(newErrors);
 
-        if (!newErrors.brandName && !newErrors.brandDescription) {
-            window.alert("Бренд создан");
-        }
     }
 
     const handleEditBrandFormSubmit = async (e) => {
@@ -173,6 +176,33 @@ export default function UserProfile () {
                     window.alert(data.message);
                     window.location.reload();
                 }
+            }
+            else {
+                const errorData = await response.json();
+                window.alert(errorData.error);
+            }
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
+    const handleDeleteBrand = async () => {
+        const deleteData = {
+            user_id: user_id
+        }
+
+        try {
+            const response = await fetch("http://localhost:8000/delete/brand", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(deleteData)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                window.alert(data.message);
+                window.location.reload();
             }
             else {
                 const errorData = await response.json();
@@ -293,7 +323,6 @@ export default function UserProfile () {
                                             maxLength={maxLength}
                                             value={description}
                                             onChange={handleDescriptionChange}
-                                            className={errors.brandDescription ? styles.errorBorder : ""}
                                         />
                                         <span className={styles.charCount}>
                                             {description.length}/{maxLength}
@@ -317,10 +346,27 @@ export default function UserProfile () {
                                     <span>{fullUserProfile.brand_name}</span>
                                     <span>Описание бренда</span>
                                     <span className={styles.brandDescription}>{fullUserProfile.brand_description}</span>
-                                    <button>Заказы клиентов</button>
-                                    <button>Товары бренда</button>
-                                    <button>Создать товар</button>
-                                    <button onClick={() => setIsWillingToEditBrand(true)}>Редактировать бренд</button>    
+                                    <div className={styles.brandActionsWrapper}>
+                                        <button>Заказы клиентов</button>
+                                        <button>Товары бренда</button>
+                                        <button>Создать товар</button>
+                                        <button onClick={() => setIsWillingToEditBrand(true)}>Редактировать бренд</button>
+                                        <button onClick={() => setIsWillingToDeleteBrand(true)}>Удалить бренд</button>
+                                    </div>
+                                    
+                                    {isWillingToDeleteBrand && 
+                                        <div className={styles.deleteBrandModal}>
+                                            <div className={styles.deleteBrandModalContent}>
+                                                <span>Вы действительно хотите удалить свой бренд <b>{fullUserProfile.brand_name}</b>?</span>
+                                                <span>После удаления все товары созданные вашим брендом будут удалены.</span>
+                                                <div className={styles.deleteBrandModalActionsWrapper}>
+                                                    <button onClick={() => setIsWillingToDeleteBrand(false)}>Отмена</button>
+                                                    <button onClick={handleDeleteBrand}>Удалить бренд</button> 
+                                                </div>    
+                                            </div>
+                                        </div>
+                                    }
+
                                 </div>   
                             ) : (
                                 <form className={styles.brandAndProfileForms} onSubmit={handleEditBrandFormSubmit}>
@@ -362,13 +408,18 @@ export default function UserProfile () {
                                             maxLength={maxLength}
                                             value={description}
                                             onChange={handleDescriptionChange}
-                                            className={errors.brandDescription ? styles.errorBorder : ""}
                                         />
                                         <span className={styles.charCount}>
                                             {description.length}/{maxLength}
                                         </span>    
                                     </div>
-                                    <button className={styles.createBrandButton} type="submit">Изменить бренд</button>
+                                    <button 
+                                        className={`${styles.createBrandButton} ${!isEditFormChanged ? styles.disabledButton : ""}`}
+                                        type="submit"
+                                        disabled={!isEditFormChanged}
+                                    >
+                                        Изменить бренд
+                                    </button>
                                 </form>   
                             )}
                         </div>

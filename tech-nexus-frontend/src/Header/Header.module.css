@@ -83,13 +83,13 @@
   justify-content: center;
   align-items: center;
   position: fixed;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: hsla(0, 0%, 0%, 0.5);
 }
 
 .modalWindowLoginAndSignInContent{
   width: 550px;
   height: 350px;
-  background-color: hsl(0, 0%, 60%);
+  background-color: hsl(0, 0%, 80%);
   border: none;
   border-radius: 10px;
   display: flex;

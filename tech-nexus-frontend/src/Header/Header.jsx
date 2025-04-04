@@ -291,7 +291,7 @@ export default function Header(){
                     {isSignInModalOpen &&
                         <div className={styles.modalWindowLoginAndSignIn}>
                             <form className={styles.modalWindowLoginAndSignInContent} onSubmit={handleRegisterFormSubmit}>
-                                <label>Псевдоним</label>
+                                <label>Имя пользователя</label>
                                 <input type="text" name="username" placeholder="Введите ваш псевдоним"/>
                                 <label>Пароль</label>
                                 <input type="text" name="password" placeholder="Введите ваш пароль"/>

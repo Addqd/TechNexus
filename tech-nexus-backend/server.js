@@ -341,23 +341,15 @@ app.put("/update/brand", upload.single("brand_img"), async (req, res) => {
             return res.status(400).json({ error: "Описание бренда не должно превышать 400 символов" });
         }
 
-        console.log(`NEW IMG: ${brand_img}`);
-        console.log(`Current img: ${currentImg}`);
-
         // IF brand_img is updated DELETE the old one
         if (brand_img && currentImg && brand_img !== currentImg) {
             const editedCurrentImg = currentImg.replace(/^\/images\//, '');
 
             const oldImagePath = path.join(__dirname, "..", "tech-nexus-frontend", "public", "images", editedCurrentImg);
 
-            console.log(`Old image path: ${oldImagePath}`);
-
             if (fs.existsSync(oldImagePath)) {
                 fs.unlinkSync(oldImagePath);
             }
-        }
-        else {
-            console.log("ELSE");
         }
 
         // Dynamic query for updating brand
@@ -393,6 +385,30 @@ app.put("/update/brand", upload.single("brand_img"), async (req, res) => {
         });
 
     }   
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Code 500 (Server error)" });
+    }
+});
+
+// Route for deleting brand by user_id
+app.delete("/delete/brand", async (req, res) => {
+    try {
+        const { user_id } = req.body;
+
+        await pool.query("UPDATE users SET is_seller = false WHERE id = $1;", [user_id]);
+
+        const deletedBrand = await pool.query(`DELETE FROM brands WHERE user_id = $1 RETURNING *;`, [user_id]);
+
+        if (deletedBrand.rows.length === 0) {
+            return res.status(404).json({ error: "Бренд не найден" });
+        }
+
+        res.status(200).json({
+            message: "Бренд успешно удален",
+            deletedBrand: deletedBrand.rows[0]
+        });
+    } 
     catch (error) {
         console.error(error);
         res.status(500).json({ error: "Code 500 (Server error)" });
