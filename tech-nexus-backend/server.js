@@ -106,11 +106,8 @@ app.get("/products/:id", async (req, res) => {
 
 // Route for user registration
 // Password is being hashed using bcrypt module
-
 // BURN THIS WITH FLAMETHROWER
-
 // Optimize repetitions
-
 app.post("/register", async (req, res) => {
     try {
         const { username, email, password } = req.body;
@@ -175,7 +172,6 @@ app.post("/register", async (req, res) => {
 // Route for user sign in
 // (Email OR Username) AND Password is required
 // Password is being compared with existing hash in the database using bcrypt module
-
 app.post("/login", async (req, res) => {
     try{
         const { login, password } = req.body;
@@ -204,7 +200,6 @@ app.post("/login", async (req, res) => {
 });
 
 // Mini profile: img and name in header
-
 app.get("/mini_profile/:user_id", async (req, res) => {
     try {
         const { user_id } = req.params;
@@ -225,7 +220,6 @@ app.get("/mini_profile/:user_id", async (req, res) => {
 });
 
 // Route for main user profile by id
-
 app.get("/profile/:user_id", async (req, res) => {
     try {
         const { user_id } = req.params;
@@ -256,8 +250,6 @@ app.get("/profile/:user_id", async (req, res) => {
         res.status(500).json({ error: "Code 500 (Server error)" });
     }
 });
-
-// ADD REGEX CHECK OF BRAND NAME AND DESCRIPTION, ALSO CHECK FOR LENGTH BOTH OF THEM
 
 // Route for brand creation by user id
 app.post("/create/brand", upload.single("brand_img"), async (req, res) => {
@@ -391,10 +383,21 @@ app.put("/update/brand", upload.single("brand_img"), async (req, res) => {
     }
 });
 
-// Route for deleting brand by user_id
+// Route for deleting brand by user_id 
+// ADD BRAND PIC DELETION
 app.delete("/delete/brand", async (req, res) => {
     try {
-        const { user_id } = req.body;
+        const { user_id, brand_img } = req.body;
+
+        if (brand_img) {
+            const editedBrandImg = brand_img.replace(/^\/images\//, '');
+
+            const imagePath = path.join(__dirname, "..", "tech-nexus-frontend", "public", "images", editedBrandImg);
+
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+            }
+        }
 
         await pool.query("UPDATE users SET is_seller = false WHERE id = $1;", [user_id]);
 

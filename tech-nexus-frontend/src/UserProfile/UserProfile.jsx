@@ -189,7 +189,8 @@ export default function UserProfile () {
 
     const handleDeleteBrand = async () => {
         const deleteData = {
-            user_id: user_id
+            user_id: user_id,
+            brand_img: fullUserProfile.brand_img
         }
 
         try {
