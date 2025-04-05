@@ -11,6 +11,7 @@ import { dirname } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const forbiddenChars = /["'`;<>\\\n\r\t\b\f]|\/\*|\*\//;
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/;
 
 // Dynamic path to imgs
 const imagesDir = path.join(__dirname, "../tech-nexus-frontend/public/images");
@@ -111,7 +112,6 @@ app.get("/products/:id", async (req, res) => {
 app.post("/register", async (req, res) => {
     try {
         const { username, email, password } = req.body;
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/;
 
         if(!username || !email || !password) {
             return res.status(400).json({ error: "Все поля обязательны для заполнения" });
@@ -147,7 +147,7 @@ app.post("/register", async (req, res) => {
         );
 
         if(existingUser.rows.length > 0) {
-            return res.status(400).json( {error: "Пользователь с таким именем или email уже существует" } );
+            return res.status(400).json( {error: "Пользователь с таким именем или Email уже существует" } );
         };
 
         const saltRounds = 10;
@@ -231,6 +231,8 @@ app.get("/profile/:user_id", async (req, res) => {
                                                 u.profile_img,
                                                 u.shipping_address,
                                                 u.balance,
+                                                u.email,
+                                                u.password,
                                                 b.brand_name,
                                                 b.brand_img,
                                                 b.brand_description
@@ -244,6 +246,158 @@ app.get("/profile/:user_id", async (req, res) => {
 
         res.json(userProfile.rows[0]);
 
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Code 500 (Server error)" });
+    }
+});
+
+// Rout for updating user profile by user_id 
+app.put("/update/profile", upload.single("profile_img"), async (req, res) => {
+    try {
+        const { user_id, username, email, password, old_password, shipping_address } = req.body;
+
+        const profile_img = req.file ? `/images/${req.file.filename}` : null;
+
+        const currentProfile = await pool.query(
+            `SELECT username, email, password, profile_img, shipping_address FROM users WHERE id = $1`,
+            [user_id]
+        );
+
+        if (currentProfile.rows.length === 0) {
+            return res.status(404).json({ error: "Пользователь не найден" });
+        }
+
+        const { username: currentUsername, email: currentEmail, password: currentPassword, profile_img: currentProfileImg, shipping_address: currentShippingAddress } = currentProfile.rows[0];
+
+        // Check if AT LEAST one of the fields is updated
+        if (
+            (!username || username === currentUsername) &&
+            (!email || email === currentEmail) &&
+            (!password || password === currentPassword) &&
+            (!shipping_address || shipping_address === currentShippingAddress) &&
+            (!profile_img || profile_img === currentProfileImg)
+        ) {
+            return res.status(400).json({ error: "Необходимо изменить хотя бы одно поле для обновления" });
+        }
+
+        if (email !== currentEmail || password) {
+
+            if (!old_password) {
+                return res.status(400).json({ error: "Введите текущий пароль" });
+            }
+
+            const validPassword = await bcrypt.compare(old_password, currentProfile.rows[0].password);
+
+            if(!validPassword){
+                return res.status(401).json({ error: "Неверный текущий пароль" });
+            }
+        }
+
+        if (forbiddenChars.test(username) || forbiddenChars.test(email) || forbiddenChars.test(password) || forbiddenChars.test(shipping_address)) {
+            return res.status(400).json({ error: "Одно из заполняемых полей содержит один или несколько запрещенных символов" });
+        }
+
+        if (email && (!emailRegex.test(email))) {
+            return res.status(400).json({ error: "Неверный формат email, используйте существующий адрес электронной почты" });
+        }
+
+        if(username && (username.length < 3 || username.length > 15)){
+            return res.status(400).json({ error: "Имя пользователя должно быть от 3 до 15 символов включительно" });
+        }
+
+        if(password && (password.length < 8 || password.length > 30)) {
+            return res.status(400).json({ error: "Пароль должен быть от 8 до 30 символов включительно" })
+        }
+
+        if (shipping_address && (shipping_address.length > 400)) {
+            return res.status(400).json({ error: "Адрес доставки не должен превышать 400 символов" });
+        }
+
+        if (username && username !== currentUsername) {
+            const existingUsername = await pool.query(
+                `SELECT * FROM users WHERE username = $1`,
+                [username]
+            );
+            if (existingUsername.rows.length > 0) {
+                return res.status(400).json({ error: "Пользователь с таким именем уже существует" });
+            }
+        }
+        
+        if (email && email !== currentEmail) {
+            const existingEmail = await pool.query(
+                `SELECT * FROM users WHERE email = $1`,
+                [email]
+            );
+            if (existingEmail.rows.length > 0) {
+                return res.status(400).json({ error: "Пользователь с таким Email уже существует" });
+            }
+        }
+
+        // IF profile_img is updated DELETE the old one
+        if (profile_img && currentProfileImg && profile_img !== currentProfileImg) {
+            const editedCurrentProfileImg = currentProfileImg.replace(/^\/images\//, '');
+
+            const oldImagePath = path.join(__dirname, "..", "tech-nexus-frontend", "public", "images", editedCurrentProfileImg);
+
+            if (fs.existsSync(oldImagePath)) {
+                fs.unlinkSync(oldImagePath);
+            }
+        }
+
+        /* // Password hashing if password is updated 
+        if (password) {
+            const saltRounds = 10;
+            const hashedPassword = await bcrypt.hash(password, saltRounds);
+        } */
+        
+
+        // Dynamic query for updating profile
+        const updates = [];
+        const values = [];
+        let index = 1;
+
+        if (username && username !== currentUsername) {
+            updates.push(`username = $${index}`);
+            values.push(username);
+            index++;
+        }
+
+        if (email && email !== currentEmail) {
+            updates.push(`email = $${index}`);
+            values.push(email);
+            index++;
+        }
+
+        if (password && password !== currentPassword) {
+            const saltRounds = 10;
+            const hashedPassword = await bcrypt.hash(password, saltRounds);
+            updates.push(`password = $${index}`);
+            values.push(hashedPassword);
+            index++;
+        }
+
+        if (shipping_address && shipping_address !== currentShippingAddress) {
+            updates.push(`shipping_address = $${index}`);
+            values.push(shipping_address);
+            index++;
+        }
+
+        if (profile_img && profile_img !== currentProfileImg) {
+            updates.push(`profile_img = $${index}`);
+            values.push(profile_img);
+            index++;
+        }
+
+        const updateQuery = `UPDATE users SET ${updates.join(", ")} WHERE id = ${user_id} RETURNING *;`;
+
+        const updatedProfile = await pool.query(updateQuery, values);
+
+        res.status(200).json({
+            message: "Профиль успешно обновлен",
+            profile: updatedProfile.rows[0]
+        });
     }
     catch (error) {
         console.error(error);
@@ -384,7 +538,6 @@ app.put("/update/brand", upload.single("brand_img"), async (req, res) => {
 });
 
 // Route for deleting brand by user_id 
-// ADD BRAND PIC DELETION
 app.delete("/delete/brand", async (req, res) => {
     try {
         const { user_id, brand_img } = req.body;

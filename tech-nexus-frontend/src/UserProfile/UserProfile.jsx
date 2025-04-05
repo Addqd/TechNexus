@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Cookies from "js-cookie";
 
+// Img type check on server and on client
+// ADD WHAT CHAT GPT SUGGESTED IN HANDLEFILECHANGE AND INTO EVERY INPUT
+// SHORTEN AMMOUNT OF EXTENSIONS TO accept="image/jpeg, image/png, image/webp, image/svg+xml"
 export default function UserProfile () {
 
     const navigate = useNavigate();
@@ -13,16 +16,27 @@ export default function UserProfile () {
     const [isWillingToEditBrand, setIsWillingToEditBrand] = useState(false);
     const [isWillingToEditProfile, setIsWillingToEditProfile] = useState(false);
     const [isWillingToDeleteBrand, setIsWillingToDeleteBrand] = useState(false);
-    const [isEditFormChanged, setIsEditFormChanged] = useState(false);
+    const [isWillingToDeleteProfile, setIsWillingToDeleteProfile] = useState(false);
+    const [isBrandEditFormChanged, setIsBrandEditFormChanged] = useState(false);
+    const [isProfileEditFormChanged, setIsProfileEditFormChanged] = useState(false);
+    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState(""); 
+    const [shippingAddress, setShippingAddress] = useState("");
     const [description, setDescription] = useState("");
     const [brandName, setBrandName] = useState("");
 
-    const [imgData, setImgData] = useState({
+    const [profileImgData, setProfileImgData] = useState({
         fileName: "/images/testImage.jpg",
-        preview: null,
+        preview: null
     });
 
-    const [errors, setErrors] = useState({
+    const [brandImgData, setBrandImgData] = useState({
+        fileName: "/images/testImage.jpg",
+        preview: null
+    });
+
+    const [brandErrors, setBrandErrors] = useState({
         brandName: false
     });
 
@@ -48,9 +62,17 @@ export default function UserProfile () {
                 const data = await response.json();
                 
                 setFullUserProfile(data);
+                setUsername(data.username);
+                setEmail(data.email);
+                setShippingAddress(data.shipping_address);
+                setPassword(data.password);
                 setBrandName(data.brand_name);
                 setDescription(data.brand_description ? data.brand_description : "");
-                setImgData({
+                setProfileImgData({
+                    fileName: data.profile_img,
+                    preview: data.profile_img
+                });
+                setBrandImgData({
                     fileName: data.brand_img,
                     preview: data.brand_img
                 });
@@ -67,28 +89,54 @@ export default function UserProfile () {
     // Temoral URL for img path cleaning on unmount
     useEffect(() => {
         return () => {
-            if (imgData.preview) {
-                URL.revokeObjectURL(imgData.preview);
+            if (brandImgData.preview) {
+                URL.revokeObjectURL(brandImgData.preview);
             }
         };
     }, []);
 
+    // Check if any of the prpile edit form fields have changed
+    useEffect(() => {
+        if (!fullUserProfile) return;
+
+        const usernameChanged = username !== fullUserProfile.username;
+        const emailChanged = email !== fullUserProfile.email;
+        const passwordChanged = password !== fullUserProfile.password;
+        const shippingAddressChanged = shippingAddress !== fullUserProfile.shipping_address;
+        const profileImgChanged = profileImgData.fileName !== fullUserProfile.profile_img;
+
+        setIsProfileEditFormChanged(usernameChanged || emailChanged || passwordChanged || shippingAddressChanged || profileImgChanged);
+    }, [username, email, password, shippingAddress, profileImgData]);
+
+    // Check if any of the brand edit form fields have changed
     useEffect(() => {
        if (!fullUserProfile) return;
        
         const nameChanged = brandName !== fullUserProfile.brand_name;
         const descChanged = description !== fullUserProfile.brand_description;
-        const imgChanged = imgData.fileName !== fullUserProfile.brand_img;
+        const brandImgChanged = brandImgData.fileName !== fullUserProfile.brand_img;
 
-        setIsEditFormChanged(nameChanged || descChanged || imgChanged);
-    }, [brandName, description, imgData, fullUserProfile]);
+        setIsBrandEditFormChanged(nameChanged || descChanged || brandImgChanged);
+    }, [brandName, description, brandImgData]);
 
-    // Handle file change when uploading an image
-    const handleFileChange = (e) => {
+    // Handle profile file change when uploading an image
+    const handleProfileFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
             const objectURL = URL.createObjectURL(file);
-            setImgData({
+            setProfileImgData({
+                fileName: file.name,
+                preview: objectURL
+            });
+        }
+    };
+
+    // Handle brand file change when uploading an image
+    const handleBrandFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const objectURL = URL.createObjectURL(file);
+            setBrandImgData({
                 fileName: file.name,
                 preview: objectURL
             });
@@ -103,6 +151,42 @@ export default function UserProfile () {
         setBrandName(e.target.value);
     };
 
+    // Handle edit profile form submit
+    const handleEditProfileFormSubmit = async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append("user_id", user_id);
+        formData.append("username", e.target.username.value.trim());
+        formData.append("email", e.target.email.value.trim());
+        formData.append("password", e.target.password.value.trim());
+        formData.append("old_password", e.target.current_password.value.trim());
+        formData.append("shipping_address", e.target.shipping_address.value.trim());
+        if (profileImgData.preview) {
+            formData.append("profile_img", e.target.profile_img.files[0]);
+        }
+
+        try {
+            const response = await fetch("http://localhost:8000/update/profile", {
+                method: "PUT",
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                window.alert(data.message);
+                window.location.reload();
+            }
+            else {
+                const errorData = await response.json();
+                window.alert(errorData.error);
+            }
+        }
+        catch (error) {
+            console.error(error);
+        }
+    }
+
     // Handle register brand form submit
     const handleCreateBrandFormSubmit = async (e) => {
         e.preventDefault();
@@ -111,7 +195,7 @@ export default function UserProfile () {
         formData.append("user_id", user_id);
         formData.append("brand_name", e.target.brand_name.value.trim());
         formData.append("brand_description", e.target.brand_description.value.trim());
-        if (imgData.preview) {
+        if (brandImgData.preview) {
             formData.append("brand_img", e.target.brand_img.files[0]);
         }
 
@@ -132,20 +216,20 @@ export default function UserProfile () {
                 window.alert(errorData.error);
             }
 
-            /* setIsWillingToEditBrand(false); */
         }
         catch (error) {
             console.error(error);
         }
 
-        const newErrors = {
+        const newBrandErrors = {
             brandName: !e.target.brand_name.value.trim(),
         };
 
-        setErrors(newErrors);
+        setBrandErrors(newBrandErrors);
 
     }
 
+    // Handle edit brand form submit
     const handleEditBrandFormSubmit = async (e) => {
         e.preventDefault();
 
@@ -153,7 +237,7 @@ export default function UserProfile () {
         formData.append("user_id", user_id);
         formData.append("brand_name", e.target.brand_name.value.trim());
         formData.append("brand_description", e.target.brand_description.value.trim());
-        if (imgData.preview) {
+        if (brandImgData.preview) {
             formData.append("brand_img", e.target.brand_img.files[0]);
         }
 
@@ -165,17 +249,9 @@ export default function UserProfile () {
 
             if (response.ok) {
                 const data = await response.json();
-                if (
-                    ((formData.get("brand_name") === data.brand_name)) &&
-                    ((formData.get("brand_description") === data.brand_description)) &&
-                    ((formData.get("brand_img") === data.brand_img))
-                ) {
-                    window.alert(data.error);
-                }
-                else {
-                    window.alert(data.message);
-                    window.location.reload();
-                }
+                window.alert(data.message);
+                window.location.reload();
+                
             }
             else {
                 const errorData = await response.json();
@@ -233,16 +309,117 @@ export default function UserProfile () {
             case "profile":
                 return (
                     <>
-                        <div className={styles.profile}>
-                            <div className={styles.mainPicWrapper}>
-                            <img className={styles.mainPic} src={fullUserProfile.profile_img || `/images/testImage.jpg`} alt="Изображение профиля" /> 
+                    <div>
+                        {!isWillingToEditProfile ? (
+                            <div className={styles.profile}>
+                                <div className={styles.mainPicWrapper}>
+                                <img className={styles.mainPic} src={fullUserProfile.profile_img || `/images/testImage.jpg`} alt="Изображение профиля" /> 
+                                </div>
+                                <span>{fullUserProfile.username}</span>
+                                <span>Баланс: {fullUserProfile.balance}₽</span> 
+                                <span>Бренд: {fullUserProfile.is_seller ? fullUserProfile.brand_name : "Нет бренда"}</span>
+                                <span>Адресс доставки: {fullUserProfile.shipping_address === null ? "Не указан" : fullUserProfile.shipping_address}</span>
+                                <button onClick={() => setIsWillingToEditProfile(true)}>Редактировать профиль</button>
+                                <button onClick={() => setIsWillingToDeleteProfile(true)}>Удалить профиль</button>
+                                
+                                {isWillingToDeleteProfile && 
+                                    <div className={styles.deleteBrandAndProfileModal}>
+                                        <div className={styles.deleteBrandAndProfileModalContent}>
+                                            <span>Вы действительно хотите удалить свой профиль, <b>{fullUserProfile.username}</b>?</span>
+                                            <span>После удаления все связанные с ним данные будут недоступны.</span>
+                                            <div className={styles.deleteBrandAndProfileModalActionsWrapper}>
+                                                <button onClick={() => setIsWillingToDeleteProfile(false)}>Отмена</button>
+                                                <button>Удалить профиль</button> 
+                                            </div>    
+                                        </div>
+                                    </div>
+                                }
                             </div>
-                            <span>{fullUserProfile.username}</span>
-                            <span>Баланс: {fullUserProfile.balance}₽</span> 
-                            <span>Бренд: {fullUserProfile.is_seller ? fullUserProfile.brand_name : "Нет бренда"}</span>
-                            <span>Адресс доставки: {fullUserProfile.shipping_address === null ? "Не указан" : fullUserProfile.shipping_address}</span>
-                            <button>Редактировать профиль</button>
-                        </div>
+                        ) : (
+                            <form className={styles.brandAndProfileForms} onSubmit={handleEditProfileFormSubmit}>
+                                <button className={styles.returnBackBtn} onClick={() => setIsWillingToEditProfile(false)}>Назад</button>
+                                <span>Редактирование Профиля</span>
+            
+                                <span>Изображение Профиля</span>
+
+                                <div style={{ userSelect: "none" }}>
+                                    <img className={styles.mainPic} src={profileImgData.preview || `/images/testImage.jpg`} alt="Превью изображеня профиля"/>
+                                </div>
+                                <span>{profileImgData.fileName === "/images/testImage.jpg" ? "Файл не выбран" : profileImgData.fileName}</span>
+                                <label className={styles.fileUploadLabel}>
+                                    Выбрать изображение
+                                    <input 
+                                        type="file"
+                                        name="profile_img"
+                                        onChange={handleProfileFileChange}
+                                        className={styles.hiddenFileInput}
+                                        accept="image/*"
+                                    />
+                                </label>
+
+                                <span>Имя пользователя</span>
+                                <input 
+                                        type="text" 
+                                        name="username" 
+                                        placeholder="Введите имя пользователя"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                    />
+                                    
+                                <span>Адрес доставки</span>
+                                <input 
+                                        type="text" 
+                                        name="shipping_address" 
+                                        placeholder="Введите адресс доставки"
+                                        value={shippingAddress}
+                                        onChange={(e) => setShippingAddress(e.target.value)}
+                                        style={{"width": "350px"}}
+                                    />
+                                <span>Текущий пароль</span>
+                                <input 
+                                        type="password" 
+                                        name="current_password" 
+                                        placeholder="Введите текущий пароль"
+                                        autoComplete="current-password"
+                                    />
+                                <div className={styles.pasEmailWrapper}>
+                                    <div className={styles.pasEmailWrapperCol}>
+                                        <span>Новый пароль</span>
+                                        <input 
+                                            type="password" 
+                                            name="password" 
+                                            placeholder="Введите новый пароль"
+                                            autoComplete="new-password"
+                                            onChange={(e) => setPassword(e.target.value)}
+                                        />
+                                    </div>
+                                    <div className={styles.pasEmailWrapperCol}>
+                                        <span>Email</span>
+                                        <input 
+                                            type="text" 
+                                            name="email" 
+                                            placeholder="Введите Email"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                                <span style={{"fontSize": "16px", "marginTop": "5px"}}>
+                                    Чтобы изменить пароль или Email нужно ввести предыдущий пароль
+                                </span>
+                            
+                                <button 
+                                    className={`${styles.createBrandAndProfileButton} ${!isProfileEditFormChanged ? styles.disabledButton : ""}`}
+                                    type="submit"
+                                    disabled={!isProfileEditFormChanged}
+                                >
+                                    Изменить профиль
+                                </button>
+                            </form>
+                        )}
+                        
+                    </div>
+                        
                         
                     </>
                 );
@@ -293,16 +470,17 @@ export default function UserProfile () {
                                     <span>Изображение бренда</span>
 
                                     <div style={{ userSelect: "none" }}>
-                                        <img className={styles.mainPic} src={imgData.preview || `/images/testImage.jpg`} alt="Превью изображеня бренда"/>
+                                        <img className={styles.mainPic} src={brandImgData.preview || `/images/testImage.jpg`} alt="Превью изображеня бренда"/>
                                     </div>
-                                    <span>{imgData.fileName === "/images/testImage.jpg" ? "Файл не выбран" : imgData.fileName}</span>
+                                    <span>{brandImgData.fileName === "/images/testImage.jpg" ? "Файл не выбран" : brandImgData.fileName}</span>
                                     <label className={styles.fileUploadLabel}>
                                         Выбрать изображение
                                         <input 
                                             type="file"
                                             name="brand_img"
-                                            onChange={handleFileChange}
+                                            onChange={handleBrandFileChange}
                                             className={styles.hiddenFileInput} 
+                                            accept="image/*"
                                         />
                                     </label>
 
@@ -311,8 +489,8 @@ export default function UserProfile () {
                                         type="text" 
                                         name="brand_name" 
                                         placeholder="Введите название бренда"
-                                        onChange={() => setErrors((prev) => ({ ...prev, brandName: false }))}
-                                        className={errors.brandName ? styles.errorBorder : ""}
+                                        onChange={() => setBrandErrors({ brandName: false })}
+                                        className={brandErrors.brandName ? styles.errorBorder : ""}
                                     />
                                     <span>Описание бренда</span>
                                     <div className={styles.textareaContainer}>
@@ -329,7 +507,7 @@ export default function UserProfile () {
                                             {description.length}/{maxLength}
                                         </span>    
                                     </div>
-                                    <button className={styles.createBrandButton} type="submit">Создать бренд</button>
+                                    <button className={styles.createBrandAndProfileButton} type="submit">Создать бренд</button>
                                 </form>   
                             )}
                         </div>
@@ -347,7 +525,7 @@ export default function UserProfile () {
                                     <span>{fullUserProfile.brand_name}</span>
                                     <span>Описание бренда</span>
                                     <span className={styles.brandDescription}>{fullUserProfile.brand_description}</span>
-                                    <div className={styles.brandActionsWrapper}>
+                                    <div className={styles.brandAndProfileActionsWrapper}>
                                         <button>Заказы клиентов</button>
                                         <button>Товары бренда</button>
                                         <button>Создать товар</button>
@@ -356,11 +534,11 @@ export default function UserProfile () {
                                     </div>
                                     
                                     {isWillingToDeleteBrand && 
-                                        <div className={styles.deleteBrandModal}>
-                                            <div className={styles.deleteBrandModalContent}>
+                                        <div className={styles.deleteBrandAndProfileModal}>
+                                            <div className={styles.deleteBrandAndProfileModalContent}>
                                                 <span>Вы действительно хотите удалить свой бренд <b>{fullUserProfile.brand_name}</b>?</span>
-                                                <span>После удаления все товары созданные вашим брендом будут удалены.</span>
-                                                <div className={styles.deleteBrandModalActionsWrapper}>
+                                                <span>После удаления все связанные с ним данные будут недоступны.</span>
+                                                <div className={styles.deleteBrandAndProfileModalActionsWrapper}>
                                                     <button onClick={() => setIsWillingToDeleteBrand(false)}>Отмена</button>
                                                     <button onClick={handleDeleteBrand}>Удалить бренд</button> 
                                                 </div>    
@@ -377,16 +555,17 @@ export default function UserProfile () {
                                     <span>Изображение бренда</span>
 
                                     <div style={{ userSelect: "none" }}>
-                                        <img className={styles.mainPic} src={imgData.preview || `/images/testImage.jpg`} alt="Превью изображеня бренда"/>
+                                        <img className={styles.mainPic} src={brandImgData.preview || `/images/testImage.jpg`} alt="Превью изображеня бренда"/>
                                     </div>
-                                    <span>{imgData.fileName === "/images/testImage.jpg" ? "Файл не выбран" : imgData.fileName}</span>
+                                    <span>{brandImgData.fileName === "/images/testImage.jpg" ? "Файл не выбран" : brandImgData.fileName}</span>
                                     <label className={styles.fileUploadLabel}>
                                         Выбрать изображение
                                         <input 
                                             type="file"
                                             name="brand_img"
-                                            onChange={handleFileChange}
+                                            onChange={handleBrandFileChange}
                                             className={styles.hiddenFileInput} 
+                                            accept="image/*"
                                         />
                                     </label>
 
@@ -397,7 +576,6 @@ export default function UserProfile () {
                                         placeholder="Введите название бренда"
                                         value={brandName}
                                         onChange={handleBrandNameChange}
-                                        className={errors.brandName ? styles.errorBorder : ""}
                                     />
                                     <span>Описание бренда</span>
                                     <div className={styles.textareaContainer}>
@@ -415,9 +593,9 @@ export default function UserProfile () {
                                         </span>    
                                     </div>
                                     <button 
-                                        className={`${styles.createBrandButton} ${!isEditFormChanged ? styles.disabledButton : ""}`}
+                                        className={`${styles.createBrandAndProfileButton} ${!isBrandEditFormChanged ? styles.disabledButton : ""}`}
                                         type="submit"
-                                        disabled={!isEditFormChanged}
+                                        disabled={!isBrandEditFormChanged}
                                     >
                                         Изменить бренд
                                     </button>
