@@ -345,14 +345,7 @@ app.put("/update/profile", upload.single("profile_img"), async (req, res) => {
                 fs.unlinkSync(oldImagePath);
             }
         }
-
-        /* // Password hashing if password is updated 
-        if (password) {
-            const saltRounds = 10;
-            const hashedPassword = await bcrypt.hash(password, saltRounds);
-        } */
         
-
         // Dynamic query for updating profile
         const updates = [];
         const values = [];
@@ -402,6 +395,46 @@ app.put("/update/profile", upload.single("profile_img"), async (req, res) => {
     catch (error) {
         console.error(error);
         res.status(500).json({ error: "Code 500 (Server error)" });
+    }
+});
+
+// Route for profile deletion by user_id
+app.delete("/delete/profile", async (req, res) => {
+    try {
+        const { user_id, profile_img, brand_img } = req.body;
+
+        if (profile_img) {
+            const editedProfileImg = profile_img.replace(/^\/images\//, '');
+
+            const imagePath = path.join(__dirname, "..", "tech-nexus-frontend", "public", "images", editedProfileImg);
+
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+            }
+        }
+
+        if (brand_img) {
+            const editedBrandImg = brand_img.replace(/^\/images\//, '');
+
+            const imagePath = path.join(__dirname, "..", "tech-nexus-frontend", "public", "images", editedBrandImg);
+
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+            }
+        }
+
+        await pool.query("UPDATE users SET is_seller = false WHERE id = $1;", [user_id]);
+
+        const deletedPrfofile = await pool.query("DELETE FROM users WHERE id = $1 RETURNING *;", [user_id]);
+
+        res.status(200).json({
+            message: "Профиль и связанный с ним бренд успешно удалены",
+            deletedProfile: deletedPrfofile.rows[0]
+        });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Code 500 (Server error)" });;
     }
 });
 

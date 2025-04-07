@@ -50,17 +50,6 @@ export default function ProductPage(){
         };
     };
 
-    /* const thumbnails = [
-        "./images/cot_pauk.png",
-        "./images/cat1.jpg",
-        "./images/cat2.jpg",
-        "./images/cat3.jpg",
-        "./images/cat4.jpg",
-        "./images/cat5.jpg",
-        "./images/cat3.jpg",
-        "./images/cat4.jpg"
-    ];
-
     /* I need to resize elements to be bigger, 
     they all are kinda small for now. */
 

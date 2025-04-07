@@ -52,12 +52,18 @@ export default function UserProfile () {
     }, []);
 
     useEffect(() => {
+        const userIdFromCookie = Cookies.get("userId");
+
+        if (!userIdFromCookie) {
+            return;
+        }
+
         const fetchUserProfile = async () => {
             try{
                 const response = await fetch(`http://localhost:8000/profile/${user_id}`);
 
                 if(!response.ok){
-                    throw new Erorr("Fetch wasn't ok");
+                    throw new Error("Fetch wasn't ok");
                 }
                 const data = await response.json();
                 
@@ -186,6 +192,38 @@ export default function UserProfile () {
             console.error(error);
         }
     }
+
+    // Handle delete profile
+    const handleDeleteProfile = async () => {
+        const deleteData = {
+            user_id: user_id,
+            profile_img: fullUserProfile.profile_img,
+            brand_img: fullUserProfile.brand_img
+        };
+
+        try {
+            const response = await fetch("http://localhost:8000/delete/profile", {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(deleteData)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                window.alert(data.message);
+                Cookies.remove("isUserLoggedIn");
+                Cookies.remove("userId");
+                window.location.reload();
+            }
+            else {
+                const errorData = await response.json();
+                window.alert(errorData.error);
+            }
+        }
+        catch (error) {
+            console.error(error);
+        }
+    };
 
     // Handle register brand form submit
     const handleCreateBrandFormSubmit = async (e) => {
@@ -329,7 +367,7 @@ export default function UserProfile () {
                                             <span>После удаления все связанные с ним данные будут недоступны.</span>
                                             <div className={styles.deleteBrandAndProfileModalActionsWrapper}>
                                                 <button onClick={() => setIsWillingToDeleteProfile(false)}>Отмена</button>
-                                                <button>Удалить профиль</button> 
+                                                <button onClick={handleDeleteProfile}>Удалить профиль</button> 
                                             </div>    
                                         </div>
                                     </div>

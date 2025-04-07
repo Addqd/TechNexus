@@ -223,6 +223,17 @@ export default function Header(){
         console.log(`isUserLogedIn: ${isUserLogedIn}`);
     }, [isUserLogedIn]);
 
+    useEffect(() => {
+        const isUserLoggedInCookie = Cookies.get("isUserLoggedIn");
+        const userIdCookie = Cookies.get("userId");
+
+        if (!isUserLoggedInCookie || !userIdCookie) {
+            if (isUserLogedIn) {
+                logOut();
+            }
+        }
+    });
+
     return(
         <>
         <header className={styles.headerContainer}>
