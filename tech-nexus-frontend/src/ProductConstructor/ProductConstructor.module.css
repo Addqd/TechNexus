@@ -1,0 +1,100 @@
+.constructorFormWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 250px auto;
+}
+
+.constructorForm {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 10px;
+    width: 800px;
+   /*  height: 600px; */
+    padding: 7px;
+    font-size: 22px;
+    border: none;
+    border-radius: 5px;
+    background-color: hsl(0, 0%, 94%);
+    box-shadow: 1px 1px 5px hsl(0, 0%, 80%); 
+}
+
+.textareaContainer {
+    position: relative;
+    user-select: none;
+}
+
+.charCount {
+    position: absolute;
+    bottom: -10px;
+    right: 4px;
+    font-size: 12px;
+    user-select: none;
+}
+
+.constructorForm textarea {
+    font-size: 17px;
+    resize: none;
+    width: 500px;
+    padding-left: 5px;
+}
+
+.constructorForm textarea::-webkit-scrollbar {
+    width: 8px; 
+    height: 8px; 
+}
+  
+.constructorForm textarea::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
+}
+
+.constructorForm textarea::-webkit-scrollbar-thumb {
+    background: hsl(0, 0%, 80%); 
+    border-radius: 10px;
+}
+  
+.constructorForm textarea::-webkit-scrollbar-thumb:hover {
+    background: hsl(0, 0%, 70%);   
+}
+
+.imagesFetcher {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    background-color: hsl(0, 0%, 90%);
+    width: 600px;
+    height: 200px;
+    overflow-x: auto;
+    gap: 10px;
+}
+
+.imagesFetcherImgTest {
+    width: 100px;
+    height: 180px;
+    background-color: hsl(0, 0%, 80%);
+    flex-shrink: 0;
+}
+
+.createProductButton {
+    width: auto;
+    align-self: center;
+    font-size: 20px;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: hsl(0, 0%, 85%);
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+    font-family: 'Times New Roman', Times, serif;
+    margin-top: 4px;
+    user-select: none;
+}
+
+.createProductButton:hover{
+    background-color: hsl(0, 0%, 70%);
+}

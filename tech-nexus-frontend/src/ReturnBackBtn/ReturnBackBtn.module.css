@@ -1,0 +1,14 @@
+.returnBackBtn{
+    width: auto;
+    height: 30px;
+    align-self: flex-start;
+    border-radius: 5px;
+    border: none;
+    background-color: hsl(0, 0%, 85%);
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+
+.returnBackBtn:hover{
+    background-color: hsl(0, 0%, 70%);
+}

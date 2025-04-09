@@ -229,6 +229,25 @@
     width: 400px
 }
 
+.linkBtn {
+    width: auto;
+    align-self: center;
+    font-size: 20px;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: hsl(0, 0%, 85%);
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+    font-family: 'Times New Roman', Times, serif;
+    margin-top: 4px;
+    user-select: none;
+}
+
+.linkBtn:hover {
+    background-color: hsl(0, 0%, 70%);
+}
+
 .brand button {
     width: auto;
     align-self: center;

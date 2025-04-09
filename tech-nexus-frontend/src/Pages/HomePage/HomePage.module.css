@@ -7,9 +7,3 @@
     flex-flow: row wrap;
     gap: 10px;
 }
-
-/* Because of <Link /> component from react-router-dom this thing is actualy prevents default text decoration of everything */
-
-.homePage a{
-    text-decoration: none;
-}

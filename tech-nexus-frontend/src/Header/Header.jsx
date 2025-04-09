@@ -278,11 +278,9 @@ export default function Header(){
                                 {isMiniAccountModalOpen &&
                                     <div className={styles.modalWindowEnter} ref={miniAccountModalRef}>
                                         <div className={styles.modalWindowEnterContent}>
-                                            <button>
-                                                <Link to={`/profile/${Cookies.get("userId")}`}>
-                                                    Профиль
-                                                </Link>
-                                            </button>
+                                            <Link to={`/profile/${Cookies.get("userId")}`} className={styles.linkBtn}>
+                                                Профиль
+                                            </Link>
                                             <button>Заказы</button>
                                             <button>Баланс</button>
                                             <button>Избранное</button>

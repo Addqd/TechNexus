@@ -1,6 +1,7 @@
 import styles from "./UserProfile.module.css";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import ReturnBackBtn from "../ReturnBackBtn/ReturnBackBtn";
 import Cookies from "js-cookie";
 
 // Img type check on server and on client
@@ -338,10 +339,6 @@ export default function UserProfile () {
         {id: "payment", label: "Способ оплаты"}
     ];
 
-    const handleGoBack = () => {
-        navigate(-1);
-    };
-
     const renderSection = (section) => {
         switch (section) {
             case "profile":
@@ -443,7 +440,7 @@ export default function UserProfile () {
                                     </div>
                                 </div>
                                 <span style={{"fontSize": "16px", "marginTop": "5px"}}>
-                                    Чтобы изменить пароль или Email нужно ввести предыдущий пароль
+                                    Чтобы изменить пароль или Email нужно ввести текущий пароль
                                 </span>
                             
                                 <button 
@@ -566,7 +563,9 @@ export default function UserProfile () {
                                     <div className={styles.brandAndProfileActionsWrapper}>
                                         <button>Заказы клиентов</button>
                                         <button>Товары бренда</button>
-                                        <button>Создать товар</button>
+                                        <Link to={"/constructor"} className={styles.linkBtn}>
+                                            Создать товар
+                                        </Link>
                                         <button onClick={() => setIsWillingToEditBrand(true)}>Редактировать бренд</button>
                                         <button onClick={() => setIsWillingToDeleteBrand(true)}>Удалить бренд</button>
                                     </div>
@@ -673,9 +672,7 @@ export default function UserProfile () {
                 {/* Sections sidebar */}
 
                 <div className={styles.sectionsWrapper}>
-                    <button className={styles.returnBackBtn} onClick={handleGoBack}>
-                        Назад
-                    </button>
+                    <ReturnBackBtn />
                     {sections.map((section) => (
                         <div
                             key={section.id}

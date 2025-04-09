@@ -2,13 +2,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import HomePage from "./Pages/HomePage/HomePage.jsx";
 import ProductPage from "./Pages/ProductPage/ProductPage.jsx";
 import UserProfile from "./UserProfile/UserProfile.jsx";
+import ProductConstructor from "./ProductConstructor/ProductConstructor.jsx";
 import Header from "./Header/Header.jsx";
 import Footer from "./Footer/Footer.jsx";
-
-// Figure out how to deploy on https or even only deploy an app in the first place, 
-// add security, (?)payment processing(?).
-
-//Total workload: guess, 1.5 months.
 
 export default function App() {
 
@@ -27,6 +23,9 @@ export default function App() {
 
               {/* User profile */}
               <Route path="/profile/:user_id" element={<UserProfile/>}/>
+
+              {/* Product constructor */}
+              <Route path="/constructor" element={<ProductConstructor/>}/>
 
             </Routes>
           </div>
