@@ -1,14 +1,60 @@
 import styles from "./ProductConstructor.module.css";
 import ReturnBackBtn from "../ReturnBackBtn/ReturnBackBtn";
-import { useState } from "react";
+import Notification from "../Notification/Notification";
+import { useEffect, useState } from "react";
+import crossInCircle from "../assets/cross-in-circle.svg";
 import Select from "react-select";
 
 export default function ProductConstructor() {
 
+    const [showLimitNotification, setShowLimitNotification] = useState(false);
+    const [showInvalidTypeNotification, setShowInvalidTypeNotification] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [thumnbnails, setThumbnails] = useState([]);
     const [description, setDescription] = useState("");
+
+    const [previewImgData,  setPreviewImgData] = useState({
+        fileName: "/images/testImage.jpg",
+        preview: null
+    });
+    
+    // Allowed img types: [jpg, png, webp, gif] 
+    const allowedTypes = [
+        "image/jpeg", 
+        "image/png", 
+        "image/webp", 
+        "image/gif"
+    ];
+
+    // (Max amount of images for product) - (1 (preview))
+    // 15 in total
+    const maxImages = 14;
 
     // maxLength for text area
     const maxLength = 600;
+
+    // Clear thumbnail previews on unmount
+    useEffect(() => {
+        return () => {
+            thumnbnails.forEach((img) => {
+                if (img.preview) {
+                    URL.revokeObjectURL(img.preview);
+                }
+            })
+
+            if (previewImgData.preview) {
+                URL.revokeObjectURL(previewImgData.preview);
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        console.log(previewImgData);
+    }, [previewImgData]);
+
+    useEffect(() => {
+        console.log(thumnbnails);
+    }, [thumnbnails]);
 
     const selectOptions = [
         { value: 'chocolate', label: 'Chocolate' },
@@ -95,13 +141,87 @@ export default function ProductConstructor() {
         }),
         menu: (provided) => ({
             ...provided,
-            ...userSelectNone,
+            ...userSelectNone
         }),
         valueContainer: (provided) => ({
             ...provided,
             ...userSelectNone,
         }),
     };
+
+    // Add preview handler
+    const handleAddPreview = (e) => {
+        const file = e.target.files[0];
+
+        // Bug fix of being unable to upload the same image twice
+        e.target.value = "";
+
+        // Check file type
+        if (!allowedTypes.includes(file.type)) {
+            setShowInvalidTypeNotification(true);
+            return;
+        }
+
+        if (file) {
+            const objectURL = URL.createObjectURL(file);
+            setPreviewImgData({
+                fileName: file.name,
+                preview: objectURL
+            });
+        }
+    };
+
+    // Add thumbnail handler
+    const handleAddThumbnail = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Bug fix of being unable to upload the same image twice
+        e.target.value = "";
+
+        // Check file type
+        if (!allowedTypes.includes(file.type)) {
+            setShowInvalidTypeNotification(true);
+            return;
+        }
+
+        setThumbnails((prev) => {
+            if (prev.length === maxImages) {
+                setShowLimitNotification(true);
+                return prev;
+            }
+
+            const preview = URL.createObjectURL(file);
+            const newImage = {
+                fileName: file.name,
+                preview: preview
+            };
+
+            return [...prev, newImage];
+        });
+    }
+
+    // Handle remove thumbnail
+    const handleRemoveThumbnail = (indexToRemove) => {
+        setThumbnails((prev) => {
+            const updated = prev.filter((_, index) => index !== indexToRemove);
+            
+            const removed = prev[indexToRemove];
+            
+            if (removed?.preview) {
+                URL.revokeObjectURL(removed.preview);
+            }
+
+            return updated;            
+        });
+    }
+
+    // Category change handler
+    const handleCategoryChange = (selectedOption) => {
+        setSelectedCategory(selectedOption);
+        console.log(`Selected category: ${selectedOption.label} (${selectedOption.value})`);
+        console.log("Selected category object:", selectedOption);
+    }
 
     const handleDescriptionChange = (e) => {
         setDescription(e.target.value);
@@ -111,46 +231,78 @@ export default function ProductConstructor() {
         <div className={styles.constructorFormWrapper}>
             <form className={styles.constructorForm}>
                 <ReturnBackBtn />
-                <span>Категория товара</span>
-                <span>Название товара</span>
+                <span>Создание товара</span>
+                <span>Название</span>
                 <input
                     type="text" 
                     name="product_name"
                     placeholder="Введите название товара..."
+                    className={styles.inputField}
                 />
+                <span>Главное изображение</span>
+                <div style={{ userSelect: "none" }}>
+                    <img 
+                        className={styles.previewPic} 
+                        src={previewImgData.preview || `/images/testImage.jpg`} 
+                        alt="Превью товара"
+                    />
+                </div>
+                <label className={styles.addImageButton}>
+                    Добавить изображение
+                    <input 
+                        type="file"
+                        name="main_pic"
+                        onChange={handleAddPreview}
+                        className={styles.hiddenFileInput}
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                    />
+                </label>
+
                 <span>Фотографии</span>
-                <div className={styles.imagesFetcher}>
-                    <div className={styles.imagesFetcherImgTest}>
-
-                    </div>
-                    <div className={styles.imagesFetcherImgTest}>
-
-                    </div>
-                    <div className={styles.imagesFetcherImgTest}>
-
-                    </div>
-                    <div className={styles.imagesFetcherImgTest}>
-
-                    </div>
-                    <div className={styles.imagesFetcherImgTest}>
-
-                    </div>
-                    <div className={styles.imagesFetcherImgTest}>
-
-                    </div>
-                    <div className={styles.imagesFetcherImgTest}>
-
-                    </div>
-                    <div className={styles.imagesFetcherImgTest}>
-
-                    </div>
-                    <div className={styles.imagesFetcherImgTest}>
-
-                    </div>
-                    <div className={styles.imagesFetcherImgTest}>
-
+                <div className={`${styles.imagesFetcher} ${styles.scrollbarStyle}`}>
+                    {thumnbnails.map((thumnbnail, index) => (
+                        <div className={styles.imageWrapper} key={index}>
+                            <img
+                                src={thumnbnail.preview} 
+                                alt={thumnbnail.fileName}
+                                className={styles.imagesFetcherImg} 
+                            />
+                            <img 
+                                src={crossInCircle} 
+                                alt="Удалить"
+                                className={styles.removeIcon}
+                                onClick={() => handleRemoveThumbnail(index)} 
+                            />
+                        </div>
+                    ))}
+                </div>
+                <div style={{"position": "relative"}}>
+                    <label className={styles.addImageButton}>
+                        Добавить изображение
+                        <input 
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp,image/gif"
+                            onChange={handleAddThumbnail}
+                            className={styles.hiddenFileInput}
+                        />
+                    </label>
+                    <div className={styles.imgCount}>
+                        {thumnbnails.length} / {maxImages}
                     </div>
                 </div>
+                
+                {showLimitNotification && 
+                    <Notification 
+                        message={"Можно прикрепить всего 14 фотографий"}
+                        onClose={() => setShowLimitNotification(false)}
+                    />
+                }
+                {showInvalidTypeNotification &&
+                    <Notification 
+                        message={"Неподдерживаемый формат файла. Разрешены только: jpg, png, webp, gif"}
+                        onClose={() => setShowInvalidTypeNotification(false)}
+                    />
+                }
                 <span>Производитель</span>
                 <Select
                     options={selectOptions}
@@ -158,8 +310,8 @@ export default function ProductConstructor() {
                     placeholder="Выберите производителя..."
                     name="producer"
                 />
-                <span>Описание товара</span>
-                <div className={styles.textareaContainer}>
+                <span>Описание</span>
+                <div className={`${styles.textareaContainer} ${styles.scrollbarStyle}`}>
                     <textarea 
                         name="product_description"
                         placeholder="Введите описание товара"
@@ -173,9 +325,107 @@ export default function ProductConstructor() {
                         {description.length}/{maxLength}
                     </span>    
                 </div>
-                <div>Characteristics Fetcher</div>
+                <span>Категория</span>
+                <Select 
+                    options={selectOptions} 
+                    styles={customStyles} 
+                    placeholder="Выберите категорию..."
+                    name="category_name"
+                    onChange={handleCategoryChange}
+                />
+                <span>Характеристики</span>
+                <div className={`${styles.characteristicsContainer} ${styles.scrollbarStyle}`}>
+                    {selectedCategory && 
+                        <>
+                        <div className={styles.characteristicsWrapper}>
+                            <Select
+                                options={selectOptions}
+                                styles={customStyles} 
+                                placeholder="Выберите характеристику..."
+                                name="attribute"
+                            />
+                            <Select
+                                options={selectOptions}
+                                styles={customStyles} 
+                                placeholder="Выберите значение..."
+                                name="attribute_value"
+                            />
+                        </div>
+                        <div className={styles.characteristicsWrapper}>
+                            <Select
+                                options={selectOptions}
+                                styles={customStyles} 
+                                placeholder="Выберите характеристику..."
+                                name="attribute"
+                            />
+                            <Select
+                                options={selectOptions}
+                                styles={customStyles} 
+                                placeholder="Выберите значение..."
+                                name="attribute_value"
+                            />
+                        </div>
+                        <div className={styles.characteristicsWrapper}>
+                            <Select
+                                options={selectOptions}
+                                styles={customStyles} 
+                                placeholder="Выберите характеристику..."
+                                name="attribute"
+                            />
+                            <Select
+                                options={selectOptions}
+                                styles={customStyles} 
+                                placeholder="Выберите значение..."
+                                name="attribute_value"
+                            />
+                        </div>
+                        <div className={styles.characteristicsWrapper}>
+                            <Select
+                                options={selectOptions}
+                                styles={customStyles} 
+                                placeholder="Выберите характеристику..."
+                                name="attribute"
+                            />
+                            <Select
+                                options={selectOptions}
+                                styles={customStyles} 
+                                placeholder="Выберите значение..."
+                                name="attribute_value"
+                            />
+                        </div>
+                        <div className={styles.characteristicsWrapper}>
+                            <Select
+                                options={selectOptions}
+                                styles={customStyles} 
+                                placeholder="Выберите характеристику..."
+                                name="attribute"
+                            />
+                            <Select
+                                options={selectOptions}
+                                styles={customStyles} 
+                                placeholder="Выберите значение..."
+                                name="attribute_value"
+                            />
+                        </div>      
+                        </>
+                        
+                    }
+                          
+                </div>
+                <span style={{"fontSize": "16px"/* , "marginTop": "5px" */}}>
+                    Чтобы назначить характеристики, необходимо выбрать категорию
+                </span>
                 <span>Цена</span>
-                <input type="text" name="price" placeholder="Введите цену..."/>
+                <div className={styles.currency}>
+                    <input 
+                        type="text" 
+                        name="price" 
+                        placeholder="Введите цену..." 
+                        className={styles.inputField}
+                    />
+                    <span>₽</span>
+                </div>
+                
                 <button type="submit" className={styles.createProductButton}>Создать товар</button>
             </form>
         </div>

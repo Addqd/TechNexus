@@ -7,6 +7,8 @@ import Cookies from "js-cookie";
 // Img type check on server and on client
 // ADD WHAT CHAT GPT SUGGESTED IN HANDLEFILECHANGE AND INTO EVERY INPUT
 // SHORTEN AMMOUNT OF EXTENSIONS TO accept="image/jpeg, image/png, image/webp, image/svg+xml"
+
+// ADD CLEANING FOR PROFILE PIC ON UNMOUNT
 export default function UserProfile () {
 
     const navigate = useNavigate();
@@ -93,11 +95,14 @@ export default function UserProfile () {
         fetchUserProfile();
     }, []);
 
-    // Temoral URL for img path cleaning on unmount
+    // Temporal URL for img path cleaning on unmount
     useEffect(() => {
         return () => {
             if (brandImgData.preview) {
                 URL.revokeObjectURL(brandImgData.preview);
+            }
+            if (profileImgData.preview) {
+                URL.revokeObjectURL(profileImgData.preview);
             }
         };
     }, []);
@@ -657,13 +662,6 @@ export default function UserProfile () {
     if (!fullUserProfile) {
         return <div>Loading...</div>;
     }
-
-    /* IMPROVE PROTECTION. 
-       Add check on wether isUserLoggedIn in cookies or not AT ALL to EVEN render the component 
-       Why is it nececcery? Basicaly, when app will be deployed on server
-       IT IS (I GUESS) possible, that when user is pressing on btn in his browser to go back
-       (tiny arrow close to address bar) IT ACTUALY CAN let him back in his profile, even
-       IF HE IS NOT LOGGED IN. So that's potential seccurity threat.*/
 
     return (
         <>

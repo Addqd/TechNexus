@@ -10,9 +10,8 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    gap: 10px;
+    gap: 14px;
     width: 800px;
-   /*  height: 600px; */
     padding: 7px;
     font-size: 22px;
     border: none;
@@ -41,23 +40,14 @@
     padding-left: 5px;
 }
 
-.constructorForm textarea::-webkit-scrollbar {
-    width: 8px; 
-    height: 8px; 
-}
-  
-.constructorForm textarea::-webkit-scrollbar-track {
-    background: transparent;
-    border-radius: 10px;
-}
-
-.constructorForm textarea::-webkit-scrollbar-thumb {
-    background: hsl(0, 0%, 80%); 
-    border-radius: 10px;
-}
-  
-.constructorForm textarea::-webkit-scrollbar-thumb:hover {
-    background: hsl(0, 0%, 70%);   
+.previewPic {
+    padding: 7px;
+    width: 300px;
+    height: 300px;
+    object-fit: contain;
+    border: none;
+    background-color: hsl(0, 0%, 90%);
+    border-radius: 5px;
 }
 
 .imagesFetcher {
@@ -65,19 +55,117 @@
     flex-direction: row;
     flex-wrap: nowrap;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     background-color: hsl(0, 0%, 90%);
     width: 600px;
     height: 200px;
     overflow-x: auto;
     gap: 10px;
+    user-select: none;
+    padding: 7px;
+    border: none;
+    border-radius: 5px;
 }
 
-.imagesFetcherImgTest {
-    width: 100px;
+.imagesFetcherImg {
+    width: 150px;
     height: 180px;
     background-color: hsl(0, 0%, 80%);
     flex-shrink: 0;
+    object-fit: contain;
+    user-select: none;
+    border: none;
+    border-radius: 5px;
+}
+
+.imageWrapper {
+    position: relative;
+}
+
+.removeIcon {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.addImageButton {
+    user-select: none;
+    display: inline-block;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    background-color: hsl(0, 0%, 85%);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-align: center;
+}
+
+.imgCount {
+    position: absolute;
+    top: -10px;
+    right: -175px;
+    font-size: 16px;
+    user-select: none;
+}
+
+.hiddenFileInput {
+    display: none;
+}
+
+.addImageButton:hover {
+    background-color: hsl(0, 0%, 70%);
+}
+
+.scrollbarStyle::-webkit-scrollbar {
+    width: 8px; 
+    height: 8px; 
+}
+  
+.scrollbarStyle::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
+}
+
+.scrollbarStyle::-webkit-scrollbar-thumb {
+    background: hsl(0, 0%, 80%); 
+    border-radius: 10px;
+}
+  
+.scrollbarStyle::-webkit-scrollbar-thumb:hover {
+    background: hsl(0, 0%, 70%);   
+}
+
+.inputField {
+    width: 220px;
+    padding: 5px;
+    font-size: 16px;
+}
+
+.characteristicsContainer {
+    width: 520px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    background-color: hsl(0, 0%, 90%);
+    padding: 7px;
+    border: none;
+    border-radius: 5px;
+    overflow-y: auto;
+    user-select: none;
+}
+
+.characteristicsWrapper{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    user-select: none;
 }
 
 .createProductButton {
@@ -92,6 +180,13 @@
     cursor: pointer;
     font-family: 'Times New Roman', Times, serif;
     margin-top: 4px;
+    user-select: none;
+}
+
+.currency {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
     user-select: none;
 }
 

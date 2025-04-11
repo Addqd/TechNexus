@@ -120,10 +120,6 @@
   gap: 7px;
 }
 
-.LoginSignInModalsWrapper:first-child{
-  height: 1000px;
-}
-
 .modalEnterCancelLogin{
   display: flex;
   gap: 15px;
