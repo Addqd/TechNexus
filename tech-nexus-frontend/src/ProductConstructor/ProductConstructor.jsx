@@ -10,7 +10,12 @@ export default function ProductConstructor() {
     const [showLimitNotification, setShowLimitNotification] = useState(false);
     const [showInvalidTypeNotification, setShowInvalidTypeNotification] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
+    const [selectedProducer, setSelectedProducer] = useState(null);
+    const [selectedAttributes, setSelectedAttributes] = useState([]);
     const [thumnbnails, setThumbnails] = useState([]);
+    const [producers, setProducers] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [attributes, setAttributes] = useState([]);
     const [description, setDescription] = useState("");
 
     const [previewImgData,  setPreviewImgData] = useState({
@@ -32,7 +37,7 @@ export default function ProductConstructor() {
 
     // maxLength for text area
     const maxLength = 600;
-
+    
     // Clear thumbnail previews on unmount
     useEffect(() => {
         return () => {
@@ -55,6 +60,44 @@ export default function ProductConstructor() {
     useEffect(() => {
         console.log(thumnbnails);
     }, [thumnbnails]);
+
+
+    // Fetch data for constructor
+    useEffect(() => {
+        const fetchConstructorData = async () => {
+            try {
+                const response = await fetch("http://localhost:8000/product-constructor-data");
+                if (response.ok) {
+                    const data = await response.json();
+
+                    setProducers(data.producers.map(p => ({
+                        value: p.id,
+                        label: p.producer_name
+                    })));
+
+                    setCategories(data.categories.map(c => ({
+                        value: c.id,
+                        label: c.category_name
+                    })));
+
+                    setAttributes(data.attributes);
+                }
+                else {
+                    const errorData = await response.json();
+                    console.error(errorData.error);
+                }
+            }
+            catch (error) {
+                console.error(error);
+            }
+        };
+        
+        fetchConstructorData();
+    }, []);
+
+    useEffect(() => {
+        console.log(selectedAttributes);
+    }, [selectedAttributes]);
 
     const selectOptions = [
         { value: 'chocolate', label: 'Chocolate' },
@@ -219,6 +262,7 @@ export default function ProductConstructor() {
     // Category change handler
     const handleCategoryChange = (selectedOption) => {
         setSelectedCategory(selectedOption);
+        setSelectedAttributes([]);
         console.log(`Selected category: ${selectedOption.label} (${selectedOption.value})`);
         console.log("Selected category object:", selectedOption);
     }
@@ -226,6 +270,11 @@ export default function ProductConstructor() {
     const handleDescriptionChange = (e) => {
         setDescription(e.target.value);
     };
+
+    // Filtered array of attributes
+    const filteredAttributes = selectedCategory
+    ? attributes.filter(attr => attr.category_id === selectedCategory.value)
+    : [];
 
     return (
         <div className={styles.constructorFormWrapper}>
@@ -305,10 +354,12 @@ export default function ProductConstructor() {
                 }
                 <span>Производитель</span>
                 <Select
-                    options={selectOptions}
+                    options={producers}
                     styles={customStyles} 
                     placeholder="Выберите производителя..."
                     name="producer"
+                    value={selectedProducer}
+                    onChange={setSelectedProducer}
                 />
                 <span>Описание</span>
                 <div className={`${styles.textareaContainer} ${styles.scrollbarStyle}`}>
@@ -327,92 +378,58 @@ export default function ProductConstructor() {
                 </div>
                 <span>Категория</span>
                 <Select 
-                    options={selectOptions} 
+                    options={categories} 
                     styles={customStyles} 
                     placeholder="Выберите категорию..."
                     name="category_name"
+                    value={selectedCategory}
                     onChange={handleCategoryChange}
                 />
                 <span>Характеристики</span>
                 <div className={`${styles.characteristicsContainer} ${styles.scrollbarStyle}`}>
-                    {selectedCategory && 
-                        <>
-                        <div className={styles.characteristicsWrapper}>
-                            <Select
-                                options={selectOptions}
-                                styles={customStyles} 
-                                placeholder="Выберите характеристику..."
-                                name="attribute"
+                    {filteredAttributes.map((attribute, index) => (
+                        <div key={attribute.attribute_id} className={styles.characteristicsWrapper}>
+                            <Select 
+                                option={[{ value: attribute.attribute_id, label: attribute.attribute_name }]}
+                                value={{ value: attribute.attribute_id, label: attribute.attribute_name }}
+                                styles={customStyles}
+                                isDisabled={true}
                             />
+
                             <Select
-                                options={selectOptions}
-                                styles={customStyles} 
+                                options={attribute.values.map(val => ({
+                                    value: val.value_id,
+                                    label: val.attribute_value
+                                }))}
+                                styles={customStyles}
                                 placeholder="Выберите значение..."
-                                name="attribute_value"
+                                name={`attribute_value_${attribute.attribute_id}`}
+                                value={
+                                    selectedAttributes.find(a => a.attribute_id === attribute.attribute_id)
+                                        ? {
+                                            value: selectedAttributes.find(a => a.attribute_id === attribute.attribute_id).value_id,
+                                            label: selectedAttributes.find(a => a.attribute_id === attribute.attribute_id).label
+                                        }
+                                        : null
+                                }
+                                onChange={(selectedOption) => {
+                                    setSelectedAttributes(prev => {
+                                        const other = prev.filter(a => a.attribute_id !== attribute.attribute_id);
+                                        return [
+                                            ...other,
+                                            {
+                                                attribute_id: attribute.attribute_id,
+                                                value_id: selectedOption.value,
+                                                label: selectedOption.label
+                                            }
+                                        ];
+                                    });
+                                }}
                             />
                         </div>
-                        <div className={styles.characteristicsWrapper}>
-                            <Select
-                                options={selectOptions}
-                                styles={customStyles} 
-                                placeholder="Выберите характеристику..."
-                                name="attribute"
-                            />
-                            <Select
-                                options={selectOptions}
-                                styles={customStyles} 
-                                placeholder="Выберите значение..."
-                                name="attribute_value"
-                            />
-                        </div>
-                        <div className={styles.characteristicsWrapper}>
-                            <Select
-                                options={selectOptions}
-                                styles={customStyles} 
-                                placeholder="Выберите характеристику..."
-                                name="attribute"
-                            />
-                            <Select
-                                options={selectOptions}
-                                styles={customStyles} 
-                                placeholder="Выберите значение..."
-                                name="attribute_value"
-                            />
-                        </div>
-                        <div className={styles.characteristicsWrapper}>
-                            <Select
-                                options={selectOptions}
-                                styles={customStyles} 
-                                placeholder="Выберите характеристику..."
-                                name="attribute"
-                            />
-                            <Select
-                                options={selectOptions}
-                                styles={customStyles} 
-                                placeholder="Выберите значение..."
-                                name="attribute_value"
-                            />
-                        </div>
-                        <div className={styles.characteristicsWrapper}>
-                            <Select
-                                options={selectOptions}
-                                styles={customStyles} 
-                                placeholder="Выберите характеристику..."
-                                name="attribute"
-                            />
-                            <Select
-                                options={selectOptions}
-                                styles={customStyles} 
-                                placeholder="Выберите значение..."
-                                name="attribute_value"
-                            />
-                        </div>      
-                        </>
-                        
-                    }
-                          
+                    ))}
                 </div>
-                <span style={{"fontSize": "16px"/* , "marginTop": "5px" */}}>
+                <span style={{ "fontSize": "16px" }}>
                     Чтобы назначить характеристики, необходимо выбрать категорию
                 </span>
                 <span>Цена</span>

@@ -604,6 +604,61 @@ app.delete("/delete/brand", async (req, res) => {
     }
 });
 
+// Get data to create poroduct in product constructor
+app.get("/product-constructor-data", async (req, res) => {
+    try {
+        const producersResult = await pool.query(
+            "SELECT id, producer_name FROM producers"
+        );
+
+        const categoriesResult = await pool.query(
+            "SELECT id, category_name FROM categories"
+        );
+
+        const attributesWithValuesResult = await pool.query(`
+            SELECT 
+                a.id AS attribute_id,
+                a.attribute AS attribute_name,
+                a.category_name_id AS category_id,
+                av.id AS value_id,
+                av.attribute_value
+            FROM attributes a
+            JOIN attribute_values av
+            ON a.id = av.attribute_name_id
+        `);
+
+        const attributesMap = new Map();
+
+        for (const row of attributesWithValuesResult.rows) {
+            if (!attributesMap.has(row.attribute_id)) {
+                attributesMap.set(row.attribute_id, {
+                    attribute_id: row.attribute_id,
+                    attribute_name: row.attribute_name,
+                    category_id: row.category_id,
+                    values: []
+                });
+            }
+
+            attributesMap.get(row.attribute_id).values.push({
+                value_id: row.value_id,
+                attribute_value: row.attribute_value
+            });
+        }
+
+        const attributes = Array.from(attributesMap.values());
+
+        res.json({
+            producers: producersResult.rows,
+            categories: categoriesResult.rows,
+            attributes
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Code 500 (Server error)" });
+    }
+});
+
 app.listen(8000, () => {
     console.log("Server is listenning on port 8000");
 });
