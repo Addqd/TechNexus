@@ -2,13 +2,19 @@ import styles from "./ProductConstructor.module.css";
 import ReturnBackBtn from "../ReturnBackBtn/ReturnBackBtn";
 import Notification from "../Notification/Notification";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import crossInCircle from "../assets/cross-in-circle.svg";
+import Cookies from "js-cookie";
 import Select from "react-select";
 
 export default function ProductConstructor() {
 
     const [showLimitNotification, setShowLimitNotification] = useState(false);
     const [showInvalidTypeNotification, setShowInvalidTypeNotification] = useState(false);
+    const [showSuccessNotification, setShowSuccessNotification] = useState(false);
+    const [showFailNotification, setShowFailNotification] = useState(false);
+    const [successMsg, setSuccessMsg] = useState("");
+    const [failMsg, setFailMsg] = useState("");
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [selectedProducer, setSelectedProducer] = useState(null);
     const [selectedAttributes, setSelectedAttributes] = useState([]);
@@ -17,10 +23,12 @@ export default function ProductConstructor() {
     const [categories, setCategories] = useState([]);
     const [attributes, setAttributes] = useState([]);
     const [description, setDescription] = useState("");
+    
 
     const [previewImgData,  setPreviewImgData] = useState({
         fileName: "/images/testImage.jpg",
-        preview: null
+        preview: null,
+        file: null
     });
     
     // Allowed img types: [jpg, png, webp, gif] 
@@ -37,6 +45,8 @@ export default function ProductConstructor() {
 
     // maxLength for text area
     const maxLength = 600;
+
+    const navigate = useNavigate();
     
     // Clear thumbnail previews on unmount
     useEffect(() => {
@@ -60,6 +70,10 @@ export default function ProductConstructor() {
     useEffect(() => {
         console.log(thumnbnails);
     }, [thumnbnails]);
+
+    useEffect(() => {
+        console.log(selectedCategory);
+    }, [selectedCategory]);
 
 
     // Fetch data for constructor
@@ -99,38 +113,9 @@ export default function ProductConstructor() {
         console.log(selectedAttributes);
     }, [selectedAttributes]);
 
-    const selectOptions = [
-        { value: 'chocolate', label: 'Chocolate' },
-        { value: 'strawberry', label: 'Strawberry' },
-        { value: 'vanilla', label: 'Vanilla' },
-        { value: 'mint', label: 'Mint' },
-        { value: 'coffee', label: 'Coffee' },
-        { value: 'cookie_dough', label: 'Cookie Dough' },
-        { value: 'pistachio', label: 'Pistachio' },
-        { value: 'mango', label: 'Mango' },
-        { value: 'raspberry', label: 'Raspberry' },
-        { value: 'blueberry', label: 'Blueberry' },
-        { value: 'lemon', label: 'Lemon' },          
-        { value: 'lime', label: 'Lime' },           
-        { value: 'watermelon', label: 'Watermelon' }, 
-        { value: 'peach', label: 'Peach' },         
-        { value: 'pear', label: 'Pear' },            
-        { value: 'apple', label: 'Apple' },          
-        { value: 'apricot', label: 'Apricot' },      
-        { value: 'blackberry', label: 'Blackberry' },
-        { value: 'cherry', label: 'Cherry' },        
-        { value: 'coconut', label: 'Coconut' },     
-        { value: 'fig', label: 'Fig' },             
-        { value: 'grapefruit', label: 'Grapefruit' }, 
-        { value: 'grape', label: 'Grape' },          
-        { value: 'kiwi', label: 'Kiwi' },            
-        { value: 'nectarine', label: 'Nectarine' },  
-        { value: 'orange', label: 'Orange' },        
-        { value: 'papaya', label: 'Papaya' },        
-        { value: 'plum', label: 'Plum' },            
-        { value: 'pomegranate', label: 'Pomegranate' },
-        { value: 'applesauce', label: 'Applesauce' }
-    ];
+    useEffect(() => {
+        console.log(selectedProducer);
+    }, [selectedProducer]);
 
     const userSelectNone = {
         userSelect: 'none',
@@ -209,7 +194,8 @@ export default function ProductConstructor() {
             const objectURL = URL.createObjectURL(file);
             setPreviewImgData({
                 fileName: file.name,
-                preview: objectURL
+                preview: objectURL,
+                file: file
             });
         }
     };
@@ -237,7 +223,8 @@ export default function ProductConstructor() {
             const preview = URL.createObjectURL(file);
             const newImage = {
                 fileName: file.name,
-                preview: preview
+                preview: preview,
+                file: file
             };
 
             return [...prev, newImage];
@@ -276,17 +263,81 @@ export default function ProductConstructor() {
     ? attributes.filter(attr => attr.category_id === selectedCategory.value)
     : [];
 
+    // Handle product creation
+    const handleCreateProductFormSubmit = async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData();
+
+        const user_id = Cookies.get("userId");
+
+        formData.append("user_id", user_id);
+
+        if (
+            !e.target.product_name.value.trim() || 
+            !selectedCategory.value || 
+            !selectedProducer.value || 
+            !e.target.description.value.trim() || 
+            !e.target.price.value.trim() || 
+            selectedAttributes.length === 0 
+        ) {
+            setShowFailNotification(true);
+            setFailMsg("Заполните все обязательные поля, как минимум одну пару атрибут-значение и загрузите главное изображение");
+            return;
+        }
+
+        formData.append("product_name", e.target.product_name.value.trim());
+        formData.append("producer_id", selectedProducer.value);
+        formData.append("description", e.target.description.value.trim());
+        formData.append("category_id", selectedCategory.value);
+        formData.append("attributes", JSON.stringify(selectedAttributes));
+        formData.append("price", e.target.price.value.trim());
+
+        if (previewImgData?.file) {
+            formData.append('mainImage', previewImgData.file);
+        }
+
+        thumnbnails.forEach((thumb) => {
+            if (thumb.file) {
+                formData.append("images", thumb.file);
+            }
+        });
+
+        try {
+            const response = await fetch("http://localhost:8000/create/product", {
+                method: "POST",
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setShowSuccessNotification(true);
+                setSuccessMsg(data.message);
+            }
+            else {
+                const errorData = await response.json();
+                setShowFailNotification(true);
+                setFailMsg(errorData.message || errorData.error);
+            }
+        }
+        catch (error) {
+            console.error(error);
+        }
+        
+    };   
+
     return (
         <div className={styles.constructorFormWrapper}>
-            <form className={styles.constructorForm}>
+            <form className={styles.constructorForm} onSubmit={handleCreateProductFormSubmit}>
                 <ReturnBackBtn />
-                <span>Создание товара</span>
+                <span style={{"marginBottom" : "30px", "fontSize": "24px"}}>Создание товара</span>
                 <span>Название</span>
                 <input
                     type="text" 
                     name="product_name"
                     placeholder="Введите название товара..."
                     className={styles.inputField}
+                    style={{ "width": "300px" }}
                 />
                 <span>Главное изображение</span>
                 <div style={{ userSelect: "none" }}>
@@ -352,6 +403,25 @@ export default function ProductConstructor() {
                         onClose={() => setShowInvalidTypeNotification(false)}
                     />
                 }
+                {showSuccessNotification &&
+                    <Notification 
+                        message={successMsg}
+                        onClose={() => {
+                            setShowSuccessNotification(false);
+                            setSuccessMsg("");
+                            navigate(-1);
+                        }}
+                    />
+                }
+                {showFailNotification &&
+                    <Notification 
+                        message={failMsg}
+                        onClose={() => {
+                            setShowFailNotification(false);
+                            setFailMsg("");
+                        }}
+                    />
+                }
                 <span>Производитель</span>
                 <Select
                     options={producers}
@@ -360,11 +430,12 @@ export default function ProductConstructor() {
                     name="producer"
                     value={selectedProducer}
                     onChange={setSelectedProducer}
+                    isSearchable={false}
                 />
                 <span>Описание</span>
                 <div className={`${styles.textareaContainer} ${styles.scrollbarStyle}`}>
                     <textarea 
-                        name="product_description"
+                        name="description"
                         placeholder="Введите описание товара"
                         rows='5'
                         cols='50'
@@ -384,6 +455,7 @@ export default function ProductConstructor() {
                     name="category_name"
                     value={selectedCategory}
                     onChange={handleCategoryChange}
+                    isSearchable={false}
                 />
                 <span>Характеристики</span>
                 <div className={`${styles.characteristicsContainer} ${styles.scrollbarStyle}`}>
@@ -425,6 +497,7 @@ export default function ProductConstructor() {
                                         ];
                                     });
                                 }}
+                                isSearchable={false}
                             />
                         </div>
                     ))}

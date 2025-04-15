@@ -1,19 +1,16 @@
 import styles from "./UserProfile.module.css";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import ReturnBackBtn from "../ReturnBackBtn/ReturnBackBtn";
+import Notification from "../Notification/Notification.jsx";
+import ReturnBackBtn from "../ReturnBackBtn/ReturnBackBtn.jsx";
 import Cookies from "js-cookie";
 
-// Img type check on server and on client
-// ADD WHAT CHAT GPT SUGGESTED IN HANDLEFILECHANGE AND INTO EVERY INPUT
-// SHORTEN AMMOUNT OF EXTENSIONS TO accept="image/jpeg, image/png, image/webp, image/svg+xml"
-
-// ADD CLEANING FOR PROFILE PIC ON UNMOUNT
 export default function UserProfile () {
 
     const navigate = useNavigate();
     const { user_id } = useParams();
 
+    const [showInvalidTypeNotification, setShowInvalidTypeNotification] = useState(false);
     const [selectedSection, setSelectedSection] = useState("profile");
     const [fullUserProfile, setFullUserProfile] = useState(null);
     const [isWillingToEditBrand, setIsWillingToEditBrand] = useState(false);
@@ -45,6 +42,14 @@ export default function UserProfile () {
 
     // maxLength for text area
     const maxLength = 400;
+
+    // Allowed img types: [jpg, png, webp, gif] 
+    const allowedTypes = [
+        "image/jpeg", 
+        "image/png", 
+        "image/webp", 
+        "image/gif"
+    ];
 
     useEffect(() => {
         const isUserLoggedIn = Cookies.get("isUserLoggedIn");
@@ -130,10 +135,17 @@ export default function UserProfile () {
 
         setIsBrandEditFormChanged(nameChanged || descChanged || brandImgChanged);
     }, [brandName, description, brandImgData]);
-
+    
     // Handle profile file change when uploading an image
     const handleProfileFileChange = (e) => {
         const file = e.target.files[0];
+
+        // Check file type
+        if (!allowedTypes.includes(file.type)) {
+            setShowInvalidTypeNotification(true);
+            return;
+        }
+
         if (file) {
             const objectURL = URL.createObjectURL(file);
             setProfileImgData({
@@ -146,6 +158,13 @@ export default function UserProfile () {
     // Handle brand file change when uploading an image
     const handleBrandFileChange = (e) => {
         const file = e.target.files[0];
+
+        // Check file type
+        if (!allowedTypes.includes(file.type)) {
+            setShowInvalidTypeNotification(true);
+            return;
+        }
+
         if (file) {
             const objectURL = URL.createObjectURL(file);
             setBrandImgData({
@@ -385,7 +404,6 @@ export default function UserProfile () {
                                 <div style={{ userSelect: "none" }}>
                                     <img className={styles.mainPic} src={profileImgData.preview || `/images/testImage.jpg`} alt="Превью изображеня профиля"/>
                                 </div>
-                                <span>{profileImgData.fileName === "/images/testImage.jpg" ? "Файл не выбран" : profileImgData.fileName}</span>
                                 <label className={styles.fileUploadLabel}>
                                     Выбрать изображение
                                     <input 
@@ -393,9 +411,16 @@ export default function UserProfile () {
                                         name="profile_img"
                                         onChange={handleProfileFileChange}
                                         className={styles.hiddenFileInput}
-                                        accept="image/*"
+                                        accept="image/jpeg,image/png,image/webp,image/gif"
                                     />
                                 </label>
+
+                                {showInvalidTypeNotification &&
+                                    <Notification 
+                                        message={"Неподдерживаемый формат файла. Разрешены только: jpg, png, webp, gif"}
+                                        onClose={() => setShowInvalidTypeNotification(false)}
+                                    />
+                                }
 
                                 <span>Имя пользователя</span>
                                 <input 
@@ -512,7 +537,6 @@ export default function UserProfile () {
                                     <div style={{ userSelect: "none" }}>
                                         <img className={styles.mainPic} src={brandImgData.preview || `/images/testImage.jpg`} alt="Превью изображеня бренда"/>
                                     </div>
-                                    <span>{brandImgData.fileName === "/images/testImage.jpg" ? "Файл не выбран" : brandImgData.fileName}</span>
                                     <label className={styles.fileUploadLabel}>
                                         Выбрать изображение
                                         <input 
@@ -520,9 +544,16 @@ export default function UserProfile () {
                                             name="brand_img"
                                             onChange={handleBrandFileChange}
                                             className={styles.hiddenFileInput} 
-                                            accept="image/*"
+                                            accept="image/jpeg,image/png,image/webp,image/gif"
                                         />
                                     </label>
+
+                                    {showInvalidTypeNotification &&
+                                        <Notification 
+                                            message={"Неподдерживаемый формат файла. Разрешены только: jpg, png, webp, gif"}
+                                            onClose={() => setShowInvalidTypeNotification(false)}
+                                        />
+                                    }
 
                                     <span>Название бренда</span>
                                     <input 
@@ -599,7 +630,6 @@ export default function UserProfile () {
                                     <div style={{ userSelect: "none" }}>
                                         <img className={styles.mainPic} src={brandImgData.preview || `/images/testImage.jpg`} alt="Превью изображеня бренда"/>
                                     </div>
-                                    <span>{brandImgData.fileName === "/images/testImage.jpg" ? "Файл не выбран" : brandImgData.fileName}</span>
                                     <label className={styles.fileUploadLabel}>
                                         Выбрать изображение
                                         <input 
@@ -607,9 +637,16 @@ export default function UserProfile () {
                                             name="brand_img"
                                             onChange={handleBrandFileChange}
                                             className={styles.hiddenFileInput} 
-                                            accept="image/*"
+                                            accept="image/jpeg,image/png,image/webp,image/gif"
                                         />
                                     </label>
+
+                                    {showInvalidTypeNotification &&
+                                        <Notification 
+                                            message={"Неподдерживаемый формат файла. Разрешены только: jpg, png, webp, gif"}
+                                            onClose={() => setShowInvalidTypeNotification(false)}
+                                        />
+                                    }
 
                                     <span>Название бренда</span>
                                     <input 

@@ -3,6 +3,7 @@ import cors from "cors";
 import pool from "./db.js";
 import bcrypt from "bcrypt";
 import multer from "multer";
+import { v4 as uuidv4 } from 'uuid';
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -29,12 +30,26 @@ const storage = multer.diskStorage({
         cb(null, imagesDir);
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
+        const ext = path.extname(file.originalname);
+        cb(null, `${uuidv4()}${ext}`);
     }
 });
 
 // Middleware for file upload
 const upload = multer({ storage });
+
+// Function to delete files from /images folder
+const deleteUploadedFiles = (files) => {
+    if (!files) return;
+
+    Object.values(files).flat().forEach(file => {
+        /* const editedFileName = file.replace(/^\/images\//, ''); */
+        const filePath = path.join(__dirname, "..", "tech-nexus-frontend", "public", "images", file.filename);
+        fs.unlink(filePath, (err) => {
+            if (err) console.error("File deletion error:", err);
+        });
+    });
+};
     
 // Route to get all products on start page
 app.get("/", async (req, res) => {
@@ -279,39 +294,47 @@ app.put("/update/profile", upload.single("profile_img"), async (req, res) => {
             (!shipping_address || shipping_address === currentShippingAddress) &&
             (!profile_img || profile_img === currentProfileImg)
         ) {
+            deleteUploadedFiles(req.files);
             return res.status(400).json({ error: "Необходимо изменить хотя бы одно поле для обновления" });
         }
 
         if (email !== currentEmail || password) {
 
             if (!old_password) {
+                deleteUploadedFiles(req.files);
                 return res.status(400).json({ error: "Введите текущий пароль" });
             }
 
             const validPassword = await bcrypt.compare(old_password, currentProfile.rows[0].password);
 
             if(!validPassword){
+                deleteUploadedFiles(req.files);
                 return res.status(401).json({ error: "Неверный текущий пароль" });
             }
         }
 
         if (forbiddenChars.test(username) || forbiddenChars.test(email) || forbiddenChars.test(password) || forbiddenChars.test(shipping_address)) {
+            deleteUploadedFiles(req.files);
             return res.status(400).json({ error: "Одно из заполняемых полей содержит один или несколько запрещенных символов" });
         }
 
         if (email && (!emailRegex.test(email))) {
+            deleteUploadedFiles(req.files);
             return res.status(400).json({ error: "Неверный формат email, используйте существующий адрес электронной почты" });
         }
 
         if(username && (username.length < 3 || username.length > 15)){
+            deleteUploadedFiles(req.files);
             return res.status(400).json({ error: "Имя пользователя должно быть от 3 до 15 символов включительно" });
         }
 
         if(password && (password.length < 8 || password.length > 30)) {
+            deleteUploadedFiles(req.files);
             return res.status(400).json({ error: "Пароль должен быть от 8 до 30 символов включительно" })
         }
 
         if (shipping_address && (shipping_address.length > 400)) {
+            deleteUploadedFiles(req.files);
             return res.status(400).json({ error: "Адрес доставки не должен превышать 400 символов" });
         }
 
@@ -321,6 +344,7 @@ app.put("/update/profile", upload.single("profile_img"), async (req, res) => {
                 [username]
             );
             if (existingUsername.rows.length > 0) {
+                deleteUploadedFiles(req.files);
                 return res.status(400).json({ error: "Пользователь с таким именем уже существует" });
             }
         }
@@ -331,6 +355,7 @@ app.put("/update/profile", upload.single("profile_img"), async (req, res) => {
                 [email]
             );
             if (existingEmail.rows.length > 0) {
+                deleteUploadedFiles(req.files);
                 return res.status(400).json({ error: "Пользователь с таким Email уже существует" });
             }
         }
@@ -394,6 +419,7 @@ app.put("/update/profile", upload.single("profile_img"), async (req, res) => {
     }
     catch (error) {
         console.error(error);
+        deleteUploadedFiles(req.files);
         res.status(500).json({ error: "Code 500 (Server error)" });
     }
 });
@@ -444,14 +470,17 @@ app.post("/create/brand", upload.single("brand_img"), async (req, res) => {
         const { user_id, brand_name, brand_description } = req.body;
 
         if (forbiddenChars.test(brand_name) || forbiddenChars.test(brand_description)) {
+            deleteUploadedFiles(req.files);
             return res.status(400).json({ error: "Название бренда или описание содержит один или несколько запрещенных символов" });
         }
 
         if (brand_name.length < 4 || brand_name.length > 15) {
+            deleteUploadedFiles(req.files);
             return res.status(400).json({ error: "Название бренда должно быть от 4 до 15 символов включительно" });
         }
 
         if (brand_description.length > 400) {
+            deleteUploadedFiles(req.files);
             return res.status(400).json({ error: "Описание бренда не должно превышать 400 символов" });
         }
 
@@ -477,6 +506,7 @@ app.post("/create/brand", upload.single("brand_img"), async (req, res) => {
     }
     catch (error) {
         console.error(error);
+        deleteUploadedFiles(req.files);
         res.status(500).json({ error: "Code 500 (Server error)" });
     }
 });
@@ -505,18 +535,22 @@ app.put("/update/brand", upload.single("brand_img"), async (req, res) => {
             (!brand_description || brand_description === currentDescription) &&
             (!brand_img || brand_img === currentImg)
         ) {
+            deleteUploadedFiles(req.files);
             return res.status(400).json( {error: "Необходимо изменить хотя бы одно поле для обновления" } );
         }
 
         if (forbiddenChars.test(brand_name) || forbiddenChars.test(brand_description)) {
+            deleteUploadedFiles(req.files);
             return res.status(400).json({ error: "Название бренда или описание содержит один или несколько запрещенных символов" });
         }
 
         if (brand_name && (brand_name.length < 4 || brand_name.length > 15)) {
+            deleteUploadedFiles(req.files);
             return res.status(400).json({ error: "Название бренда должно быть от 4 до 15 символов включительно" });
         }
 
         if (brand_description.length > 400) {
+            deleteUploadedFiles(req.files);
             return res.status(400).json({ error: "Описание бренда не должно превышать 400 символов" });
         }
 
@@ -566,6 +600,7 @@ app.put("/update/brand", upload.single("brand_img"), async (req, res) => {
     }   
     catch (error) {
         console.error(error);
+        deleteUploadedFiles(req.files);
         res.status(500).json({ error: "Code 500 (Server error)" });
     }
 });
@@ -655,6 +690,107 @@ app.get("/product-constructor-data", async (req, res) => {
 
     } catch (error) {
         console.error(error);
+        res.status(500).json({ error: "Code 500 (Server error)" });
+    }
+});
+
+// Route for product creation in product constructor
+app.post("/create/product", upload.fields([
+    { name: 'mainImage', maxCount: 1 },
+    { name: 'images', maxCount: 14}
+]), async (req, res) => {
+    try {
+        const { user_id, product_name, price, description, category_id, attributes, producer_id } = req.body;
+
+        if (!product_name || !price || !category_id || !producer_id || !description || !attributes || !req.files['mainImage']) {
+            deleteUploadedFiles(req.files);
+            return res.status(400).json({ message: "Заполните все обязательные поля, как минимум одну пару атрибут-значение и загрузите главное изображение" });
+        }
+
+        if (forbiddenChars.test(product_name) || forbiddenChars.test(description) || forbiddenChars.test(price)) {
+            deleteUploadedFiles(req.files);
+            res.status(400).json({ message: "Одно из заполняемых полей содержит один или несколько запрещенных символов" });
+        }
+
+        if (product_name.length < 3 || product_name.length > 150 ) {
+            deleteUploadedFiles(req.files);
+            res.status(400).json({ message: "Название товара должно быть длинной от 3 до 150 символов включительно" });
+        }
+
+        if (description.length > 600 ) {
+            deleteUploadedFiles(req.files);
+            res.status(400).json({ message: "Описание товара должно быть длинной не более 600 символов включительно" });
+        }
+
+        if (isNaN(parseInt(price)) || parseInt(price) <= 0 || parseInt(price) >= 1000000 ) {
+            deleteUploadedFiles(req.files);
+            return res.status(400).json({ message: "Цена должна быть числом, не меньше 0 и не больше 1000000" });
+        }
+
+        const brand = await pool.query("SELECT id FROM brands WHERE user_id = $1", [user_id]);
+        if (brand.rowCount === 0) return res.status(404).json({ error: 'Бренд не найден' });
+        
+        const brand_id = brand.rows[0].id;
+
+        const newProduct = await pool.query(
+            `INSERT INTO products (product_name, brand_name_id, price, category_name_id, description, producer_id) 
+            VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`, 
+            [
+                product_name,
+                brand_id,
+                price,
+                category_id,
+                description,
+                producer_id
+            ]
+        );
+
+        const product_id = newProduct.rows[0].id;
+
+        const parsedAttributes = JSON.parse(attributes);
+
+        // Insert product attributes
+        if (attributes) {
+            for (const attr of parsedAttributes) {
+                const { value_id } = attr;
+                await pool.query(
+                    `INSERT INTO product_attributes (product_id, attribute_value_id) 
+                    VALUES ($1, $2)`,
+                    [product_id, value_id]
+                );
+            }
+        } 
+        else {
+            deleteUploadedFiles(req.files);
+            return res.status(400).json({ message: "Товар должен содержать хотя бы одну пару атрибут-значение" })
+        }
+
+        if (req.files['mainImage']) {
+            await pool.query(
+                `INSERT INTO product_imgs (product_id, img_url, is_main)
+                VALUES ($1, $2, $3)`,
+                [product_id, `/images/${req.files['mainImage'][0].filename}`, true]
+            );
+        }
+
+        if (req.files['images']) {
+            for (const img of req.files['images']) {
+                await pool.query(
+                    `INSERT INTO product_imgs (product_id, img_url, is_main)
+                    VALUES ($1, $2, $3)`,
+                    [product_id, `/images/${img.filename}`, false]
+                );
+            }
+        }
+
+        res.status(201).json({ 
+            message: "Товар успешно создан", 
+            product: newProduct.rows[0] 
+        });
+    }
+    catch (error) {
+        console.error(error);
+        deleteUploadedFiles(req.files);
         res.status(500).json({ error: "Code 500 (Server error)" });
     }
 });
