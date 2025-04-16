@@ -1,6 +1,6 @@
 import styles from "./ImageGallery.module.css";
-import arrowUp from "../assets/arrow-up.svg";
-import arrowDown from "../assets/arrow-down.svg";
+import arrowUp from "../assets/arrowUp.svg";
+import arrowDown from "../assets/arrowDown.svg";
 import { useState, useEffect, useRef } from "react";
 
 
@@ -86,13 +86,14 @@ export default function ImageGallery({ thumbnails }) {
                     <div className={styles.thumbnails} ref={thumbnailsRef} onScroll={checkScroll}>
                         {
                             thumbnails.map((src, index) => (
-                                <img 
-                                    key={index}
-                                    src={src}
-                                    alt={`Thumbnail ${index + 1}`}
-                                    className={`${styles.thumbnail} ${selectedIndex === index ? styles.selected : ""}`}
-                                    onMouseOver={() => setSelectedIndex(index)}
-                                />
+                                <div key={index} className={styles.thumbnailContainer}>
+                                    <img 
+                                        src={src}
+                                        alt={`Thumbnail ${index + 1}`}
+                                        onMouseOver={() => setSelectedIndex(index)}
+                                        className={`${styles.thumbnail} ${selectedIndex === index ? styles.selected : ""}`}
+                                    />
+                                </div>
                             ))
                         }
                     </div>

@@ -97,7 +97,7 @@ export default function Header(){
             const isEnterButton = event.target.closest(`.${styles.enterButton}`);
 
             if (!isEnterButton &&
-            miniAccountModalRef.current && !miniAccountModalRef.current.contains(event.target) ||
+            (miniAccountModalRef.current && !miniAccountModalRef.current.contains(event.target)) ||
             (enterModalRef.current && !enterModalRef.current.contains(event.target))) {
                 setIsMiniAccountModalOpen(false);
                 setIsEnterModalOpen(false);
@@ -210,15 +210,6 @@ export default function Header(){
         window.location.reload();
     };
 
-    /* 
-        1. Implement The hole login and sign in thing (DONE)
-        2. Add validation of user data on server (password.correct?, login.correct?)
-        on regestration and login (DONE)
-        3. Change usercircle and it's corresponding modal when logged in <-- (Add more btns, modify registration, add state change of userloggedin in there as well, and page refresh)
-        4. Add validation of user data in frontend as well (PENDING)
-        5. Think about adding jwt token authorization (PENDING)
-    */
-
     useEffect(() => {
         console.log(`isUserLogedIn: ${isUserLogedIn}`);
     }, [isUserLogedIn]);
@@ -283,7 +274,6 @@ export default function Header(){
                                             </Link>
                                             <button>Заказы</button>
                                             <button>Баланс</button>
-                                            <button>Избранное</button>
                                             <button>История</button>
                                             <button onClick={logOut}>Выйти</button>
                                         </div>
@@ -304,8 +294,6 @@ export default function Header(){
                                 <input type="text" name="username" placeholder="Введите ваш псевдоним"/>
                                 <label>Пароль</label>
                                 <input type="text" name="password" placeholder="Введите ваш пароль"/>
-                                <label>Повторите пароль</label>
-                                <input type="text" placeholder="Повторите ваш пароль"/>
                                 <label>Email</label>
                                 <input type="text" name="email" placeholder="Введите ваш Email"/>
                                 <div className={styles.modalEnterCancelLogin}>
@@ -335,7 +323,6 @@ export default function Header(){
                                     <button onClick={closeLoginModal}>Отмена</button>
                                     <button type="submit">Войти</button>  
                                 </div>
-                                <span>Забыли пароль?</span>
                                 <span onClick={() => {
                                     closeLoginModal();
                                     openSignInModal();

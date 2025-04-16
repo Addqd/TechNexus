@@ -68,26 +68,10 @@ export default function ProductPage(){
                 </div>
                 <div className={styles.productMain}>
 
-                    {/*
-                        1. Implement login and registration functions connected to server as well <--
-                        2. Create user menu when logged in. 
-                        3. Create personal cabinet with data edit function.
-
-                        Change collor of arrows in thumbnails on scroll btns
-                        (deferred)
-                        
-                        Create btns to scroll imgs like in yandex market inside main img
-                        (deferred)
-
-                        Also make an a fixed height and width box inside of which
-                        thumbnail will render with it's object-fit: contain
-                        (deferred)
-                     */}
-
                     <ImageGallery thumbnails={product.images.map(img => img.img_url)}/>
 
                     <div className={styles.description}>
-                        <h4>{product.product_name}</h4>
+                        <span className={styles.customHeader}>{product.product_name}</span>
                         <div className={styles.brandAndProducer}>
                             <p>{product.brand_name}</p>
                             <p>{product.producer}</p>
@@ -102,27 +86,19 @@ export default function ProductPage(){
                             Полное описание 
                         </button>
 
-                    </div>
-                    
-                    {/* Very ugly. But ok for now.
-                    Maybe reposition this under SmallDescr? 
-                    However, more content will be added inside 
-                    this container.*/}
-
-                    <div className={styles.buyToCart}>
-                        <p>{product.price}</p>
-                        <div className={styles.buyToCartBtns}>
-                            <button>В корзину</button>
+                        <div className={styles.buyToCart}>
+                            <span>{product.price} ₽</span>
                             <button>Купить</button>
                         </div>
                     </div>
+
                     <div className={styles.fullDescrAndReviewsWrapper}>
                         <div className={styles.fullDescr} ref={fullDescrRef}>
-                            <h4>Полное описание товара</h4>
-                             <div className={styles.descText}>
-                                <p>{product.description}</p>
-                            </div>  
-                            <h4>Все характеристики товара</h4>
+                            <span className={styles.customHeader}>Полное описание товара</span>
+                            
+                            <span className={styles.customDescr}>{product.description}</span>
+                            
+                            <span className={styles.customHeader}>Все характеристики товара</span>
                             
                             <FullCharacteristicsTable 
                                 characteristics={product.attributes.map(attr => attr.attribute)} 

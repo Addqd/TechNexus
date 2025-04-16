@@ -6,4 +6,10 @@
     margin-bottom: 20px;
     flex-flow: row wrap;
     gap: 10px;
+    height: 1980px;
+}
+
+.linkWrapper {
+    height: 320px;
+    border-radius: 10px;
 }

@@ -35,17 +35,17 @@ export default function HomePage() {
 
     return(
         <main className={styles.homePage}>
-            {products.map((product) => (
-                <Link key={product.id} to={`/product/${product.id}`}>
-                    <ProductCard 
-                        imgPath={product.img_url || "./images/testImage.jpg"}
-                        itemName={product.product_name} 
-                        itemProducer={product.producer} 
-                        itemCategory={product.category_name} 
-                        itemPrice={product.price}
-                    />
-                </Link>
-            ))}
+                {products.map((product) => (
+                    <Link key={product.id} to={`/product/${product.id}`} className={styles.linkWrapper}>
+                        <ProductCard 
+                            imgPath={product.img_url || "./images/testImage.jpg"}
+                            itemName={product.product_name} 
+                            itemProducer={product.producer} 
+                            itemCategory={product.category_name} 
+                            itemPrice={product.price}
+                        />
+                    </Link>
+                ))}
         </main>
     );
 }

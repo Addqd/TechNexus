@@ -1,7 +1,26 @@
 .characteristicsWrapper {
     overflow: hidden;
-    border: 1px solid;
+    border: none;
+    border-radius: 5px;
+    background-color: hsl(0, 0%, 89%);
     width: 500px;
+    height: 160px;
+    padding: 5px;
+    position: relative;
+}
+
+.characteristicsWrapper::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 25px;
+    pointer-events: none;
+    background: linear-gradient(to bottom, hsla(0, 0%, 100%, 0) 0%, hsla(0, 0%, 89%, 1) 100%);
+    backdrop-filter: blur(1px);
+    -webkit-backdrop-filter: blur(1px);
 }
 
 .characteristicsRow {

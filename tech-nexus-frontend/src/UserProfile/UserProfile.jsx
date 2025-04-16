@@ -11,6 +11,10 @@ export default function UserProfile () {
     const { user_id } = useParams();
 
     const [showInvalidTypeNotification, setShowInvalidTypeNotification] = useState(false);
+    const [showSuccessNotification, setShowSuccessNotification] = useState(false);
+    const [successMsg, setSuccessMsg] = useState("");
+    const [showFailNotification, setShowFailNotification] = useState(false);
+    const [failMsg, setFailMsg] = useState("");
     const [selectedSection, setSelectedSection] = useState("profile");
     const [fullUserProfile, setFullUserProfile] = useState(null);
     const [isWillingToEditBrand, setIsWillingToEditBrand] = useState(false);
@@ -205,12 +209,13 @@ export default function UserProfile () {
 
             if (response.ok) {
                 const data = await response.json();
-                window.alert(data.message);
-                window.location.reload();
+                setShowSuccessNotification(true);
+                setSuccessMsg(data.message);
             }
             else {
                 const errorData = await response.json();
-                window.alert(errorData.error);
+                setShowFailNotification(true);
+                setFailMsg(errorData.error || errorData.message);
             }
         }
         catch (error) {
@@ -235,14 +240,13 @@ export default function UserProfile () {
 
             if (response.ok) {
                 const data = await response.json();
-                window.alert(data.message);
-                Cookies.remove("isUserLoggedIn");
-                Cookies.remove("userId");
-                window.location.reload();
+                setShowSuccessNotification(true);
+                setSuccessMsg(data.message);
             }
             else {
                 const errorData = await response.json();
-                window.alert(errorData.error);
+                showFailNotification(true);
+                setFailMsg(errorData.error || errorData.message);
             }
         }
         catch (error) {
@@ -270,13 +274,13 @@ export default function UserProfile () {
 
             if (response.ok) {
                 const data = await response.json();
-                window.alert(data.message);
-                window.location.reload();
-                setIsWillingToEditBrand(false);
+                setShowSuccessNotification(true);
+                setSuccessMsg(data.message);
             }
             else {
                 const errorData = await response.json();
-                window.alert(errorData.error);
+                showFailNotification(true);
+                setFailMsg(errorData.error || errorData.message);
             }
 
         }
@@ -312,13 +316,13 @@ export default function UserProfile () {
 
             if (response.ok) {
                 const data = await response.json();
-                window.alert(data.message);
-                window.location.reload();
-                
+                setShowSuccessNotification(true);
+                setSuccessMsg(data.message);
             }
             else {
                 const errorData = await response.json();
-                window.alert(errorData.error);
+                showFailNotification(true);
+                setFailMsg(errorData.error || errorData.message);
             }
         }
         catch (error) {
@@ -341,12 +345,13 @@ export default function UserProfile () {
 
             if (response.ok) {
                 const data = await response.json();
-                window.alert(data.message);
-                window.location.reload();
+                setShowSuccessNotification(true);
+                setSuccessMsg(data.message);
             }
             else {
                 const errorData = await response.json();
-                window.alert(errorData.error);
+                setShowFailNotification(true);
+                setFailMsg(errorData.error || errorData.message);
             }
         }
         catch (error) {
@@ -357,8 +362,7 @@ export default function UserProfile () {
     const sections = [
         {id: "profile", label: "Профиль"},
         {id: "orders", label: "Заказы"},
-        {id: "history", label: "Купленные товары"},
-        {id: "favorites", label: "Избранное"},
+        {id: "history", label: "История"},
         {id: "brand", label: "Ваш бренд"},
         {id: "payment", label: "Способ оплаты"}
     ];
@@ -382,16 +386,37 @@ export default function UserProfile () {
                                 <button onClick={() => setIsWillingToDeleteProfile(true)}>Удалить профиль</button>
                                 
                                 {isWillingToDeleteProfile && 
-                                    <div className={styles.deleteBrandAndProfileModal}>
-                                        <div className={styles.deleteBrandAndProfileModalContent}>
-                                            <span>Вы действительно хотите удалить свой профиль, <b>{fullUserProfile.username}</b>?</span>
-                                            <span>После удаления все связанные с ним данные будут недоступны.</span>
-                                            <div className={styles.deleteBrandAndProfileModalActionsWrapper}>
-                                                <button onClick={() => setIsWillingToDeleteProfile(false)}>Отмена</button>
-                                                <button onClick={handleDeleteProfile}>Удалить профиль</button> 
-                                            </div>    
+                                    <>
+                                        <div className={styles.deleteBrandAndProfileModal}>
+                                            <div className={styles.deleteBrandAndProfileModalContent}>
+                                                <span>Вы действительно хотите удалить свой профиль, <b>{fullUserProfile.username}</b>?</span>
+                                                <span>После удаления все связанные с ним данные будут недоступны.</span>
+                                                <div className={styles.deleteBrandAndProfileModalActionsWrapper}>
+                                                    <button onClick={() => setIsWillingToDeleteProfile(false)}>Отмена</button>
+                                                    <button onClick={handleDeleteProfile}>Удалить профиль</button> 
+                                                </div>    
+                                            </div>
                                         </div>
-                                    </div>
+                                        {showSuccessNotification &&
+                                            <Notification 
+                                                message={successMsg}
+                                                onClose={() => {
+                                                    setIsWillingToDeleteProfile(false);
+                                                    setShowSuccessNotification(false);
+                                                    window.location.reload();
+                                                    Cookies.remove("isUserLoggedIn");
+                                                    Cookies.remove("userId");
+                                                }}
+                                            />
+                                        }
+
+                                        {showFailNotification &&
+                                            <Notification 
+                                                message={failMsg}
+                                                onClose={() => setShowFailNotification(false)}
+                                            />
+                                        }
+                                    </>
                                 }
                             </div>
                         ) : (
@@ -419,6 +444,23 @@ export default function UserProfile () {
                                     <Notification 
                                         message={"Неподдерживаемый формат файла. Разрешены только: jpg, png, webp, gif"}
                                         onClose={() => setShowInvalidTypeNotification(false)}
+                                    />
+                                }
+
+                                {showSuccessNotification &&
+                                    <Notification 
+                                        message={successMsg}
+                                        onClose={() => {
+                                            setShowSuccessNotification(false);
+                                            window.location.reload();
+                                        }}
+                                    />
+                                }
+
+                                {showFailNotification &&
+                                    <Notification 
+                                        message={failMsg}
+                                        onClose={() => setShowFailNotification(false)}
                                     />
                                 }
 
@@ -507,15 +549,6 @@ export default function UserProfile () {
                         </div>
                     </>
                 );
-            case "favorites":
-                return (
-                    <>
-                        <div className={styles.favorites}>
-                            <span>Product card goes here</span>
-                            <span>Is in stock, if true - it's ammount</span>
-                        </div>
-                    </>
-                );
             case "brand": 
 
                 if (!fullUserProfile.is_seller) {
@@ -552,6 +585,24 @@ export default function UserProfile () {
                                         <Notification 
                                             message={"Неподдерживаемый формат файла. Разрешены только: jpg, png, webp, gif"}
                                             onClose={() => setShowInvalidTypeNotification(false)}
+                                        />
+                                    }
+
+                                    {showSuccessNotification &&
+                                        <Notification 
+                                            message={successMsg}
+                                            onClose={() => {
+                                                setShowSuccessNotification(false);
+                                                setIsWillingToEditBrand(false);
+                                                window.location.reload();
+                                            }}
+                                        />
+                                    }
+
+                                    {showFailNotification &&
+                                        <Notification 
+                                            message={failMsg}
+                                            onClose={() => setShowFailNotification(false)}
                                         />
                                     }
 
@@ -607,16 +658,35 @@ export default function UserProfile () {
                                     </div>
                                     
                                     {isWillingToDeleteBrand && 
-                                        <div className={styles.deleteBrandAndProfileModal}>
-                                            <div className={styles.deleteBrandAndProfileModalContent}>
-                                                <span>Вы действительно хотите удалить свой бренд <b>{fullUserProfile.brand_name}</b>?</span>
-                                                <span>После удаления все связанные с ним данные будут недоступны.</span>
-                                                <div className={styles.deleteBrandAndProfileModalActionsWrapper}>
-                                                    <button onClick={() => setIsWillingToDeleteBrand(false)}>Отмена</button>
-                                                    <button onClick={handleDeleteBrand}>Удалить бренд</button> 
-                                                </div>    
+                                        <>
+                                            <div className={styles.deleteBrandAndProfileModal}>
+                                                <div className={styles.deleteBrandAndProfileModalContent}>
+                                                    <span>Вы действительно хотите удалить свой бренд <b>{fullUserProfile.brand_name}</b>?</span>
+                                                    <span>После удаления все связанные с ним данные будут недоступны.</span>
+                                                    <div className={styles.deleteBrandAndProfileModalActionsWrapper}>
+                                                        <button onClick={() => setIsWillingToDeleteBrand(false)}>Отмена</button>
+                                                        <button onClick={handleDeleteBrand}>Удалить бренд</button> 
+                                                    </div>    
+                                                </div>
                                             </div>
-                                        </div>
+                                            {showSuccessNotification &&
+                                                <Notification 
+                                                    message={successMsg}
+                                                    onClose={() => {
+                                                        setIsWillingToDeleteBrand(false);
+                                                        setShowSuccessNotification(false);
+                                                        window.location.reload();
+                                                    }}
+                                                />
+                                            }
+
+                                            {showFailNotification &&
+                                                <Notification 
+                                                    message={failMsg}
+                                                    onClose={() => setShowFailNotification(false)}
+                                                />
+                                            }
+                                        </>
                                     }
 
                                 </div>   
@@ -645,6 +715,23 @@ export default function UserProfile () {
                                         <Notification 
                                             message={"Неподдерживаемый формат файла. Разрешены только: jpg, png, webp, gif"}
                                             onClose={() => setShowInvalidTypeNotification(false)}
+                                        />
+                                    }
+
+                                    {showSuccessNotification &&
+                                        <Notification 
+                                            message={successMsg}
+                                            onClose={() => {
+                                                setShowSuccessNotification(false);
+                                                window.location.reload();
+                                            }}
+                                        />
+                                    }
+
+                                    {showFailNotification &&
+                                        <Notification 
+                                            message={failMsg}
+                                            onClose={() => setShowFailNotification(false)}
                                         />
                                     }
 

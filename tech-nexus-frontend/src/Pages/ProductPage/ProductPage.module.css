@@ -1,5 +1,5 @@
 .productContent{
-    max-width: 1600px;
+    max-width: 1300px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -46,20 +46,20 @@
 .productMain{
     display: flex;
     width: 100%;
-    /* justify-content: space-between; */
     align-items: center;
     gap: 30px;
     flex-wrap: wrap;
 }
 
 .description{
-    /* flex: 1; */
     align-self: flex-start;
-    max-width: 500px;
-    padding: 10px; 
-    border: 1px solid;
-    max-height: 500px;
-    overflow: hidden;
+    width: 510px;
+    padding: 12px; 
+    padding-top: 20px;
+    min-height: 400px;
+    border: none;
+    border-radius: 5px;
+    background-color: hsl(0, 0%, 92%);
 }
 
 .scrollToFullDescrButton {
@@ -69,7 +69,13 @@
     padding: 8px 12px;
     border: none;
     border-radius: 5px;
+    background-color: hsl(0, 0%, 85%);
+    transition: background-color 0.3s ease;
     cursor: pointer;
+}
+
+.scrollToFullDescrButton:hover{
+    background-color: hsl(0, 0%, 70%);
 }
 
 .descTable{
@@ -86,8 +92,15 @@
 }
 
 .fullDescr{
-    border: 1px solid;
+    display: flex;
+    border: none;
+    border-radius: 5px;
+    background-color: hsl(0, 0%, 92%);
     width: 980px;
+    padding: 9px;
+    padding-left: 40px;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .reviews{
@@ -96,7 +109,6 @@
     width: 100%;
     max-width: 800px;
     margin-top: 20px;
-    border: 1px solid;
 }
 
 .reviews img{
@@ -104,17 +116,43 @@
 }
 
 .buyToCart{
+    margin-top: 20px;
+    margin-bottom: 5px;
     padding: 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 100%;
-    max-width: 250px;
-    border: 1px solid;
+    justify-content: center;
+    align-self: center;
+    justify-self: center;
+    width: 200px;
+    height: 85px;
+    border: none;
+    border-radius: 5px;
+    background-color: hsl(0, 0%, 89%);
+    font-size: 20px;
+    gap: 10px
 }
 
-.buyToCartBtns{
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
+.customHeader {
+    font-size: 20px;
+}
+
+.customDescr {
+    font-size: 16px;
+}
+
+.buyToCart button{
+    font-size: 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: hsl(0, 0%, 85%);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    cursor: pointer;
+    padding: 8px 12px;
+}
+
+.buyToCart button:hover{
+    background-color: hsl(120, 63%, 34%);
+    color: white;
 }
