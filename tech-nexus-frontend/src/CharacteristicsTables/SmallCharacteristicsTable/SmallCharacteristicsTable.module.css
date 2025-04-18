@@ -16,7 +16,7 @@
     left: 0;
     right: 0;
     bottom: -1px;
-    height: 25px;
+    height: 16px;
     pointer-events: none;
     background: linear-gradient(to bottom, hsla(0, 0%, 100%, 0) 0%, hsla(0, 0%, 89%, 1) 100%);
     backdrop-filter: blur(1px);

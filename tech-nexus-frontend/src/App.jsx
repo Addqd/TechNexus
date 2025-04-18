@@ -3,6 +3,7 @@ import HomePage from "./Pages/HomePage/HomePage.jsx";
 import ProductPage from "./Pages/ProductPage/ProductPage.jsx";
 import UserProfile from "./UserProfile/UserProfile.jsx";
 import ProductConstructor from "./ProductConstructor/ProductConstructor.jsx";
+import BrandProducts from "./BrandProducts/BrandProducts.jsx";
 import Header from "./Header/Header.jsx";
 import Footer from "./Footer/Footer.jsx";
 
@@ -26,6 +27,9 @@ export default function App() {
 
               {/* Product constructor */}
               <Route path="/constructor" element={<ProductConstructor/>}/>
+
+              {/* Brand products */}
+              <Route path="/brand_products/:brand_id" element={<BrandProducts/>}/>
 
             </Routes>
           </div>

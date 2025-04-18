@@ -3,7 +3,7 @@ import ImageGallery from "../../ImageGallery/ImageGallery.jsx";
 import FullCharacteristicsTable from "../../CharacteristicsTables/FullCharacteristicsTable/FullCharacteristicsTable.jsx";
 import SmallCharacteristicsTable from "../../CharacteristicsTables/SmallCharacteristicsTable/SmallCharacteristicsTable.jsx";
 import { useState, useEffect, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 
 export default function ProductPage(){
 
@@ -73,7 +73,9 @@ export default function ProductPage(){
                     <div className={styles.description}>
                         <span className={styles.customHeader}>{product.product_name}</span>
                         <div className={styles.brandAndProducer}>
-                            <p>{product.brand_name}</p>
+                            <Link to={`/brand_products/${product.brand_id}`} className={styles.linkBtn}>
+                                {product.brand_name}  
+                            </Link>
                             <p>{product.producer}</p>
                         </div>
 

@@ -29,6 +29,7 @@ export default function UserProfile () {
     const [shippingAddress, setShippingAddress] = useState("");
     const [description, setDescription] = useState("");
     const [brandName, setBrandName] = useState("");
+    const [brandId, setBrandId] = useState("");
 
     const [profileImgData, setProfileImgData] = useState({
         fileName: "/images/testImage.jpg",
@@ -94,6 +95,7 @@ export default function UserProfile () {
                     fileName: data.brand_img,
                     preview: data.brand_img
                 });
+                setBrandId(data.brand_id);
 
             }
             catch(error){
@@ -649,7 +651,9 @@ export default function UserProfile () {
                                     <span className={styles.brandDescription}>{fullUserProfile.brand_description}</span>
                                     <div className={styles.brandAndProfileActionsWrapper}>
                                         <button>Заказы клиентов</button>
-                                        <button>Товары бренда</button>
+                                        <Link to={`/brand_products/${brandId}`} className={styles.linkBtn}>
+                                            Товары бренда    
+                                        </Link>
                                         <Link to={"/constructor"} className={styles.linkBtn}>
                                             Создать товар
                                         </Link>

@@ -9,8 +9,8 @@ export default function Footer(){
             <footer className={styles.footerContainer}>
                     <div className={styles.userIfno}>
                         <p><b>Покупателям и продавцам</b></p>
-                        <p><a href="">Как пользоваться сайтом</a></p>
-                        <p><a href="">Вопросы и ответы</a></p>
+                        <p><a href="https://github.com/Addqd/TechNexus">Как пользоваться сайтом</a></p>
+                        <p><a href="https://github.com/Addqd/TechNexus">Вопросы и ответы</a></p>
                     </div>
                     <div className={styles.copyrightSection}>
                        <p>© TechNexus 2025. Все права защищены.</p> 

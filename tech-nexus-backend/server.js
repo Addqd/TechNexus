@@ -86,6 +86,7 @@ app.get("/products/:id", async (req, res) => {
                                                 p.price,
                                                 p.description,
                                                 b.brand_name,
+                                                b.id AS brand_id,
                                                 mc.master_category_name,
                                                 c.category_name,
                                                 COALESCE(json_agg(DISTINCT jsonb_build_object(
@@ -106,7 +107,7 @@ app.get("/products/:id", async (req, res) => {
                                                 LEFT JOIN attributes a ON av.attribute_name_id = a.id
                                                 LEFT JOIN product_imgs pi ON p.id = pi.product_id
                                                 WHERE p.id = $1
-                                                GROUP BY p.id, b.brand_name, mc.master_category_name, c.category_name, pr.producer_name;`, [id]);
+                                                GROUP BY b.id, p.id, b.brand_name, mc.master_category_name, c.category_name, pr.producer_name;`, [id]);
 
         if (productById.rows.length === 0){
             res.status(404).json({error: 'Code 404 (Not found)'});
@@ -174,7 +175,7 @@ app.post("/register", async (req, res) => {
         );
 
         res.status(201).json({
-            message: "User registered successfully",
+            message: "Вы успешно зарегистрировались",
             newUser: registration.rows[0]
         });
     } 
@@ -248,6 +249,7 @@ app.get("/profile/:user_id", async (req, res) => {
                                                 u.balance,
                                                 u.email,
                                                 u.password,
+                                                b.id AS brand_id,
                                                 b.brand_name,
                                                 b.brand_img,
                                                 b.brand_description
@@ -791,6 +793,107 @@ app.post("/create/product", upload.fields([
     catch (error) {
         console.error(error);
         deleteUploadedFiles(req.files);
+        res.status(500).json({ error: "Code 500 (Server error)" });
+    }
+});
+
+// Route for getting all products of particular brand
+app.get("/brand_products/:brand_id", async (req, res) => {
+    try {
+        const { brand_id } = req.params;
+
+        const brandProducts = await pool.query(
+            `SELECT 
+                b.id AS brand_id,
+                b.user_id,
+                b.brand_name,
+                b.brand_img,
+                b.brand_description,
+                COALESCE(
+                    json_agg(
+                        CASE 
+                            WHEN p.id IS NOT NULL THEN json_build_object(
+                                'id', p.id,
+                                'product_name', p.product_name,
+                                'price', p.price,
+                                'category_name', c.category_name,
+                                'producer', pr.producer_name,
+                                'img_url', pi_main.img_url,
+                                'product_images', (
+                                    SELECT json_agg(json_build_object('img_url', pi.img_url))
+                                    FROM product_imgs pi
+                                    WHERE pi.product_id = p.id
+                                )
+                            )
+                        END
+                    ) FILTER (WHERE p.id IS NOT NULL), '[]'
+                ) AS products
+            FROM brands b
+            LEFT JOIN products p ON p.brand_name_id = b.id
+            LEFT JOIN categories c ON p.category_name_id = c.id
+            LEFT JOIN producers pr ON p.producer_id = pr.id
+            LEFT JOIN product_imgs pi_main ON p.id = pi_main.product_id AND pi_main.is_main = true
+            WHERE b.id = $1
+            GROUP BY b.id;
+            `,
+            [brand_id]
+        );
+
+        if (brandProducts.rows.length === 0) {
+            return res.status(404).json({ error: "Бренд не нйден" });
+        }
+
+        res.status(200).json(brandProducts.rows[0]);
+
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Code 500 (Server error)" });
+    }
+});
+
+// Route for product deletion by product_id
+app.delete("/delete/product", async (req, res) => {
+    try {
+        const { product_id, product_images } = req.body;
+
+        const deletedProduct = await pool.query(
+            `DELETE FROM products WHERE id = $1 RETURNING *;`,
+            [product_id]
+        );
+
+        if (deletedProduct.rows.length === 0) {
+            return res.status(404).json({ error: "Товар не найден" });
+        }
+
+        // Deletion of img, if exists in particular product
+        if (product_images) {
+            product_images.forEach(imgObj => {
+                if (imgObj && imgObj.img_url) {
+                    const editedPath = imgObj.img_url.replace(/^\/images\//, "");
+                    const fullImagePath = path.join(__dirname, "..", "tech-nexus-frontend", "public", "images", editedPath);
+
+                    if (fs.existsSync(fullImagePath)) {
+                        fs.unlink(fullImagePath, (err) => {
+                            if (err) {
+                                console.error(`Error deleting a file: ${fullImagePath}`, err);
+                            }
+                            else {
+                                console.log(`File ${fullImagePath} deleted successfully`);
+                            }
+                        });
+                    }
+                }
+            });    
+        }
+        
+        res.status(200).json({
+            message: "Товар успешно удален",
+            deletedProduct: deletedProduct.rows[0]
+        });
+    }
+    catch (error) {
+        console.error(error);
         res.status(500).json({ error: "Code 500 (Server error)" });
     }
 });

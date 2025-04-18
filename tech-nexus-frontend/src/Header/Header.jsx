@@ -2,22 +2,29 @@ import SearchBar from "../SearchBar/SearchBar.jsx";
 import userCirlcle from "../assets/user-circle-svgrepo-com.svg";
 import styles from "./Header.module.css";
 import SideBarMenu from "../SideBarMenu/SideBarMenu.jsx";
+import Notification from "../Notification/Notification.jsx";
 import Cookies from "js-cookie";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 
 export default function Header(){
 
+    const [showSuccessNotification, setShowSuccessNotification] = useState(false);
+    const [successMsg, setSuccessMsg] = useState("");
+    const [showFailNotification, setShowFailNotification] = useState(false);
+    const [failMsg, setFailMsg] = useState("");
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
     const [isEnterModalOpen, setIsEnterModalOpen] = useState(false);
     const [isMiniAccountModalOpen, setIsMiniAccountModalOpen] = useState(false);
     const [isUserLogedIn, setIsUserLogedIn] = useState(false);
     const [miniUser, setMiniUser] = useState({ name: "", img: userCirlcle });
+    const enterButtonRef = useRef(null);
     const miniAccountModalRef = useRef(null);
     const enterModalRef = useRef(null);
 
     const location = useLocation();
+    const navigate = useNavigate();
 
     const openSignInModal = () => {
         setIsEnterModalOpen(false);
@@ -93,10 +100,14 @@ export default function Header(){
 
     useEffect(() => {
         function handleClickOutside(event) {
+            
+            if (event.target === enterButtonRef.current || enterButtonRef.current.contains(event.target)) {
+                return;
+            }
 
-            const isEnterButton = event.target.closest(`.${styles.enterButton}`);
+            /* const isEnterButton = enterButtonRef.current.contains(event.target); */
 
-            if (!isEnterButton &&
+            if (/* !isEnterButton && */
             (miniAccountModalRef.current && !miniAccountModalRef.current.contains(event.target)) ||
             (enterModalRef.current && !enterModalRef.current.contains(event.target))) {
                 setIsMiniAccountModalOpen(false);
@@ -133,16 +144,16 @@ export default function Header(){
 
             if(response.ok){
                 const data = await response.json();
-                window.alert(data.message);
+                setShowSuccessNotification(true);
+                setSuccessMsg(data.message);
                 setIsUserLogedIn(true);
                 Cookies.set("isUserLoggedIn", "true", { expires: 7 });
                 Cookies.set("userId", data.newUser.id, { expires: 7 });
-                closeSignInModal();
-                window.location.reload();
             }
             else{
                 const errorData = await response.json();
-                window.alert(errorData.error);
+                setShowFailNotification(true);
+                setFailMsg(errorData.error || errorData.message);
             }
 
             console.log(`isUserLogedIn: ${isUserLogedIn}`);
@@ -170,16 +181,16 @@ export default function Header(){
 
             if(response.ok){
                 const data = await response.json();
-                window.alert(data.message);
+                setShowSuccessNotification(true);
+                setSuccessMsg(data.message);
                 setIsUserLogedIn(true);
                 Cookies.set("isUserLoggedIn", "true", { expires: 7 });
                 Cookies.set("userId", data.user.id, { expires: 7 });
-                closeLoginModal();
-                window.location.reload();
             }
             else{
                 const errorData = await response.json();
-                window.alert(errorData.error);
+                setShowFailNotification(true);
+                setFailMsg(errorData.error || errorData.message);
             }
         }
         catch (error) {
@@ -229,14 +240,18 @@ export default function Header(){
         <>
         <header className={styles.headerContainer}>
                <SideBarMenu />
+               <img 
+                    src="/images/TechNexusTransparrentLogo.png" 
+                    alt="Лого сайта"
+                    className={styles.logoPic} 
+                    onClick={() => navigate("/")}
+                />
                <SearchBar />
-
-                {/* Shows default svg and btns IF NOT loged in */}
 
                <div>
                     {!isUserLogedIn &&
                         <div className={styles.enterWrapper}>
-                            <button className={styles.enterButton} onClick={isEnterModalOpen ? closeEnterModal : openEnterModal}>
+                            <button className={styles.enterButton} onClick={isEnterModalOpen ? closeEnterModal : openEnterModal} ref={enterButtonRef}>
                                 <img src={userCirlcle} alt="Войти" />
                                 <span>Вход</span>
                             </button> 
@@ -261,7 +276,7 @@ export default function Header(){
                <div>
                     {isUserLogedIn &&
                         <div className={styles.enterWrapper}>
-                            <button className={styles.enterButton} onClick={isMiniAccountModalOpen ? closeMiniAccountModal : openMiniAccountModal}>
+                            <button className={styles.enterButton} onClick={isMiniAccountModalOpen ? closeMiniAccountModal : openMiniAccountModal} ref={enterButtonRef}>
                                 <img src={miniUser.img} alt="Картинка профиля" />
                                 <span>{miniUser.name}</span>
                             </button>
@@ -284,27 +299,51 @@ export default function Header(){
                     }
                </div>
 
-                {/* Sign in modal */}
+                {/* Sign up modal */}
 
                 <div>
                     {isSignInModalOpen &&
                         <div className={styles.modalWindowLoginAndSignIn}>
-                            <form className={styles.modalWindowLoginAndSignInContent} onSubmit={handleRegisterFormSubmit}>
-                                <label>Имя пользователя</label>
+                            <form className={styles.modalWindowLoginAndSignInContent} onSubmit={handleRegisterFormSubmit} >
+                                <span>Имя пользователя</span>
                                 <input type="text" name="username" placeholder="Введите ваш псевдоним"/>
-                                <label>Пароль</label>
+                                <span>Пароль</span>
                                 <input type="text" name="password" placeholder="Введите ваш пароль"/>
-                                <label>Email</label>
+                                <span>Email</span>
                                 <input type="text" name="email" placeholder="Введите ваш Email"/>
                                 <div className={styles.modalEnterCancelLogin}>
                                     <button onClick={closeSignInModal}>Отмена</button>
                                     <button type="submit">Зарегистрироваться</button>  
                                 </div>
-                                <span onClick={() => {
-                                   closeSignInModal();
-                                   openLoginModal(); 
-                                }}>Уже есть аккаунт? Войдите здесь</span>
+                                <span 
+                                    onClick={() => {
+                                        closeSignInModal();
+                                        openLoginModal(); }}
+                                    className={styles.hoverableText}
+                                    >Уже есть аккаунт? Войдите здесь</span>
                             </form>
+                            {showSuccessNotification &&
+                                <Notification 
+                                    message={successMsg}
+                                    onClose={() => {
+                                        setShowSuccessNotification(false);
+                                        closeSignInModal();
+                                        setSuccessMsg("");
+                                        window.location.reload();
+                                    }}
+                                />
+                            }
+                            
+                            {showFailNotification &&
+                                <Notification 
+                                    message={failMsg}
+                                    onClose={() => {
+                                        setShowFailNotification(false);
+                                        setErrorMsg("");
+                                    }} 
+                                />
+                            }
+                            
                         </div>    
                     }
                 </div>
@@ -315,10 +354,10 @@ export default function Header(){
                     {isLoginModalOpen && 
                         <div className={styles.modalWindowLoginAndSignIn}>
                             <form className={styles.modalWindowLoginAndSignInContent} onSubmit={handleLoginFormSubmit}>
-                                <label >Имя пользователя или Email</label>
+                                <span>Имя пользователя или Email</span>
                                 <input type="text" name="login" placeholder="Введите ваш логин"/>
-                                <label>Пароль</label>
-                                <input type="text" name="password" placeholder="Ввелите ваш пароль"/>
+                                <span>Пароль</span>
+                                <input type="text" name="password" placeholder="Введите ваш пароль"/>
                                 <div className={styles.modalEnterCancelLogin}>
                                     <button onClick={closeLoginModal}>Отмена</button>
                                     <button type="submit">Войти</button>  
@@ -326,8 +365,32 @@ export default function Header(){
                                 <span onClick={() => {
                                     closeLoginModal();
                                     openSignInModal();
-                                }}>Нет аккаунта? Зарегистрируйтесь здесь</span>
+                                }}
+                                className={styles.hoverableText}
+                                >Нет аккаунта? Зарегистрируйтесь здесь</span>
                             </form>
+
+                            {showSuccessNotification &&
+                                <Notification 
+                                    message={successMsg}
+                                    onClose={() => {
+                                        setShowSuccessNotification(false);
+                                        closeLoginModal();
+                                        setSuccessMsg("");
+                                        window.location.reload();
+                                    }}
+                                />
+                            }
+                            
+                            {showFailNotification &&
+                                <Notification 
+                                    message={failMsg}
+                                    onClose={() => {
+                                        setShowFailNotification(false);
+                                        setErrorMsg("");
+                                    }} 
+                                />
+                            }
                         </div>    
                     }
                 </div>

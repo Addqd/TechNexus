@@ -17,7 +17,7 @@ export default function ProductCard({ imgPath, itemName, itemProducer, itemCateg
                     <p className={styles.itemNameText}>{itemName}</p>
                     <p className={styles.itemProducerText}>{itemProducer}</p>
                     <p className={styles.itemCategoryText}>{itemCategory}</p>
-                    <button className={styles.addToCartButton}>В корзину</button>
+                    <button className={styles.addToCartButton}>Купить</button>
                 </div>
             </div>
         </>
