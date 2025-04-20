@@ -1,6 +1,7 @@
 .productContent{
     max-width: 1300px;
-    margin: 0 auto;
+    margin: 100px auto;
+    margin-bottom: 300px;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -35,12 +36,29 @@
     gap: 30px;
     margin: 0 5px;
     max-width: 299px;
+    padding: 10px;
+}
+
+.linkBtn {
+    align-self: flex-end;
+    text-decoration: none;
+}
+
+.linkBtn:hover {
+    text-decoration: underline;
 }
 
 .brandAndProducer p {
     white-space: nowrap; 
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.reviewWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
 }
 
 .productMain{
@@ -109,6 +127,7 @@
     width: 100%;
     max-width: 800px;
     margin-top: 20px;
+    gap: 10px;
 }
 
 .reviews img{

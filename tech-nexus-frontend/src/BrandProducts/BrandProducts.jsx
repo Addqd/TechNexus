@@ -1,6 +1,7 @@
 import styles from "./BrandProducts.module.css";
 import ProductCard from "../ProductCard/ProductCard.jsx";
 import Notification from "../Notification/Notification.jsx";
+import ReturnBackBtn from "../ReturnBackBtn/ReturnBackBtn.jsx";
 import arrowRight from "../assets/arrowRight.svg";
 import arrowLeft from "../assets/arrowLeft.svg";
 import crossInCircle from "../assets/cross-in-circle.svg";
@@ -105,6 +106,7 @@ export default function BrandProducts() {
 
     return(
             <div className={styles.BrandProductsWrapper}>
+                <ReturnBackBtn />
                 <div className={styles.brandInfo}>
                     <div className={styles.mainPicWrapper}>
                         <img className={styles.mainPic}

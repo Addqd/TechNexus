@@ -246,7 +246,6 @@ app.get("/profile/:user_id", async (req, res) => {
                                                 u.is_seller,
                                                 u.profile_img,
                                                 u.shipping_address,
-                                                u.balance,
                                                 u.email,
                                                 u.password,
                                                 b.id AS brand_id,
@@ -724,9 +723,9 @@ app.post("/create/product", upload.fields([
             res.status(400).json({ message: "Описание товара должно быть длинной не более 600 символов включительно" });
         }
 
-        if (isNaN(parseInt(price)) || parseInt(price) <= 0 || parseInt(price) >= 1000000 ) {
+        if (isNaN(parseInt(price)) || parseInt(price) <= 0 || parseInt(price) > 999999 ) {
             deleteUploadedFiles(req.files);
-            return res.status(400).json({ message: "Цена должна быть числом, не меньше 0 и не больше 1000000" });
+            return res.status(400).json({ message: "Цена должна быть числом, не меньше 0 и не больше 999999" });
         }
 
         const brand = await pool.query("SELECT id FROM brands WHERE user_id = $1", [user_id]);

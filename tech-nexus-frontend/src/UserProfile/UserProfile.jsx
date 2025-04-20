@@ -363,10 +363,7 @@ export default function UserProfile () {
 
     const sections = [
         {id: "profile", label: "Профиль"},
-        {id: "orders", label: "Заказы"},
-        {id: "history", label: "История"},
-        {id: "brand", label: "Ваш бренд"},
-        {id: "payment", label: "Способ оплаты"}
+        {id: "brand", label: "Ваш бренд"}
     ];
 
     const renderSection = (section) => {
@@ -381,7 +378,6 @@ export default function UserProfile () {
                                 <img className={styles.mainPic} src={fullUserProfile.profile_img || `/images/testImage.jpg`} alt="Изображение профиля" /> 
                                 </div>
                                 <span>{fullUserProfile.username}</span>
-                                <span>Баланс: {fullUserProfile.balance}₽</span> 
                                 <span>Бренд: {fullUserProfile.is_seller ? fullUserProfile.brand_name : "Нет бренда"}</span>
                                 <span>Адресс доставки: {fullUserProfile.shipping_address === null ? "Не указан" : fullUserProfile.shipping_address}</span>
                                 <button onClick={() => setIsWillingToEditProfile(true)}>Редактировать профиль</button>
@@ -530,25 +526,6 @@ export default function UserProfile () {
                     </div>
                         
                         
-                    </>
-                );
-            case "orders": 
-                return (
-                    <>
-                        <div className={styles.orders}>
-                            <span>Product card goes here</span>
-                            <span>Status of the purchase</span>
-                            <span>Approximate date of arrival</span>
-                        </div>
-                    </>
-                );
-            case "history":
-                return (
-                    <>
-                        <div className={styles.history}>
-                            <span>Product card goes here</span>
-                            <span>Rewiev, if never reviewed: Provide an option to do so</span>
-                        </div>
                     </>
                 );
             case "brand": 
@@ -771,14 +748,6 @@ export default function UserProfile () {
                                     </button>
                                 </form>   
                             )}
-                        </div>
-                    </>
-                );
-            case "payment":
-                return (
-                    <>
-                        <div className={styles.payment}>
-                            <span>Cool looking box like banking card, with registration</span>
                         </div>
                     </>
                 );

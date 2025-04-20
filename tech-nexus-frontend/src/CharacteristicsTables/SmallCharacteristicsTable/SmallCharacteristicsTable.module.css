@@ -33,7 +33,7 @@
 .characteristicsTableHeaderDiv {
     position: relative;
     align-items: start;
-    width: 40%;
+    width: 60%;
 }
 
 .underlineDelimeter {
@@ -46,7 +46,7 @@
 }
 
 .characteristicsTableCharValue {
-    width: 60%;
+    width: 40%;
     display: flex;
     flex-direction: row;
 }

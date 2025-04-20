@@ -287,9 +287,6 @@ export default function Header(){
                                             <Link to={`/profile/${Cookies.get("userId")}`} className={styles.linkBtn}>
                                                 Профиль
                                             </Link>
-                                            <button>Заказы</button>
-                                            <button>Баланс</button>
-                                            <button>История</button>
                                             <button onClick={logOut}>Выйти</button>
                                         </div>
                                     </div>

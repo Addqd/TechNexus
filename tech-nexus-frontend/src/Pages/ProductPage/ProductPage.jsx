@@ -2,6 +2,8 @@ import styles from "./ProductPage.module.css";
 import ImageGallery from "../../ImageGallery/ImageGallery.jsx";
 import FullCharacteristicsTable from "../../CharacteristicsTables/FullCharacteristicsTable/FullCharacteristicsTable.jsx";
 import SmallCharacteristicsTable from "../../CharacteristicsTables/SmallCharacteristicsTable/SmallCharacteristicsTable.jsx";
+import Notification from "../../Notification/Notification.jsx";
+import Review from "../../Review/Review.jsx";
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 
@@ -11,6 +13,7 @@ export default function ProductPage(){
 
     const { id } = useParams();
     const [product, setProduct] = useState(null);
+    const [showSuccessfulPurchaseNotification, setShowSuccessfulPurchaseNotification] = useState(false);
     const fullDescrRef = useRef(null);
 
     useEffect(() => {
@@ -54,7 +57,7 @@ export default function ProductPage(){
     they all are kinda small for now. */
 
     if(!product){
-        return <p>Добавить сюда загрузку</p>;
+        return <p>Loading...</p>;
     };
 
     return(
@@ -76,7 +79,7 @@ export default function ProductPage(){
                             <Link to={`/brand_products/${product.brand_id}`} className={styles.linkBtn}>
                                 {product.brand_name}  
                             </Link>
-                            <p>{product.producer}</p>
+                            <span>{product.producer}</span>
                         </div>
 
                         <SmallCharacteristicsTable 
@@ -90,7 +93,7 @@ export default function ProductPage(){
 
                         <div className={styles.buyToCart}>
                             <span>{product.price} ₽</span>
-                            <button>Купить</button>
+                            <button onClick={() => setShowSuccessfulPurchaseNotification(true)}>Купить</button>
                         </div>
                     </div>
 
@@ -108,19 +111,36 @@ export default function ProductPage(){
                             />
 
                         </div>
-                        <div className={styles.reviews}>
-                            <h4>Отзывы - 5 звездочек из 5</h4><br />
-                            <p>Геральт Из Ривии</p>
-                            <p>5 звездочек из 5</p>
-                            <img src="/images/cat4.jpg"/>
-                            <pre>
-                                Достоинства: Отличный Кот 👍 <br />
-                                Недостатки: Слишком хороший <br />
-                                Комментарий: Я счастлив <br />
-                            </pre>
-                        </div> 
+                        
+                       {/*  <div className={styles.reviews}>
+                            <Review 
+                                rating={5}
+                                reviewText={"Отличный товар, хорошая цена!"}
+                            />    
+                            <Review 
+                                rating={5}
+                                reviewText={"Отличный товар, хорошая цена!"}
+                            />
+                            <Review 
+                                rating={5}
+                                reviewText={"Отличный товар, хорошая цена!"}
+                            />
+                            <Review 
+                                rating={5}
+                                reviewText={"Отличный товар, хорошая цена!"}
+                            />            
+                        </div> */}
                     </div>
                 </div>
+
+                {showSuccessfulPurchaseNotification &&
+                    <Notification 
+                        message={"Спасибо за покупку!"}
+                        onClose={() => {
+                            setShowSuccessfulPurchaseNotification(false);
+                        }}
+                    />
+                }
             </div>  
         </>
     );
