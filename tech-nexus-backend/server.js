@@ -897,6 +897,46 @@ app.delete("/delete/product", async (req, res) => {
     }
 });
 
+// Route for search query by categories.
+// Two appliencies: search bar in header, sidebar with categories
+// GET /category?category_name={category_name}
+app.get("/category", async (req, res) => {
+    try {
+        const { category_name } = req.query;
+
+        if (!category_name) {
+            return res.status(400).json({ error: "Нужно указать название категории" });
+        }
+
+        // Normalize category name
+        const searchTerm = `%${category_name.toLowerCase().replace(/-/g, ' ')}%`;
+
+        const categorizedProducts = await pool.query(
+            `SELECT 
+                p.id, 
+                p.product_name, 
+                pr.producer_name AS producer, 
+                p.price, 
+                c.category_name, 
+                pi.img_url
+            FROM products p
+            JOIN brands b ON p.brand_name_id = b.id
+            JOIN categories c ON p.category_name_id = c.id
+            JOIN producers pr ON p.producer_id = pr.id
+            LEFT JOIN product_imgs pi ON p.id = pi.product_id AND pi.is_main = true
+            WHERE LOWER(c.category_name) ILIKE $1
+            ORDER BY p.id;`,
+            [searchTerm]
+        );
+
+        res.status(200).json(categorizedProducts.rows);
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Code 500 (Server error)" });
+    }
+});
+
 app.listen(8000, () => {
     console.log("Server is listenning on port 8000");
 });
