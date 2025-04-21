@@ -909,7 +909,7 @@ app.get("/category", async (req, res) => {
         }
 
         // Normalize category name
-        const searchTerm = `%${category_name.toLowerCase().replace(/-/g, ' ')}%`;
+        const searchTerm = `%${category_name.toLowerCase()}%`;
 
         const categorizedProducts = await pool.query(
             `SELECT 

@@ -3,16 +3,48 @@
     top: 100%;
     left: 0;
     width: 250px;
-    background-color: hsl(0, 0%, 60%);
+    background-color: hsl(0, 0%, 89%);
     padding: 20px;
-    box-shadow: 2px 0 5px hsl(0, 0%, 70%);
+    box-shadow: 2px 0 5px hsl(0, 0%, 79%);
     transition: transform 0.3s ease;
     z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    height: 300px;
+    overflow-x: auto;
 }
 
-.sideBar a{
-    color: black;
-    text-decoration: none;
+.sideBar::-webkit-scrollbar {
+    width: 8px; 
+    height: 8px; 
+}
+  
+.sideBar::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
+}
+
+.sideBar::-webkit-scrollbar-thumb {
+    background: hsl(0, 0%, 80%); 
+    border-radius: 10px;
+  }
+  
+.sideBar::-webkit-scrollbar-thumb:hover {
+    background: hsl(0, 0%, 70%);   
+}
+
+.masterCategoryName {
+    font-size: 20px;
+    color: hsl(0, 0%, 40%);
+    user-select: none;
+}
+
+.categoryName {
+    font-size: 16px;
+    cursor: pointer;
+    padding-left: 15px;
+    user-select: none;
 }
 
 .sidebarOpen {

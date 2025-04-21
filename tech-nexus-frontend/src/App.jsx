@@ -4,6 +4,7 @@ import ProductPage from "./Pages/ProductPage/ProductPage.jsx";
 import UserProfile from "./UserProfile/UserProfile.jsx";
 import ProductConstructor from "./ProductConstructor/ProductConstructor.jsx";
 import BrandProducts from "./BrandProducts/BrandProducts.jsx";
+import CategorizedHomePage from "./Pages/CategorizedHomePage/CategorizedHomePage.jsx";
 import Header from "./Header/Header.jsx";
 import Footer from "./Footer/Footer.jsx";
 
@@ -30,6 +31,9 @@ export default function App() {
 
               {/* Brand products */}
               <Route path="/brand_products/:brand_id" element={<BrandProducts/>}/>
+
+              {/* Search Results */}
+              <Route path="/category/:category_name" element={<CategorizedHomePage />} />
 
             </Routes>
           </div>
