@@ -2,12 +2,6 @@ import styles from "./ProductCard.module.css";
 
 export default function ProductCard({ imgPath, itemName, itemProducer, itemCategory, itemPrice }){
 
-    //Card of the prodcut
-
-    // Create different page that will serve as a template for server to load data from db. Will be using id's to do that.
-
-    // Add ... when owerflow happens with text
-
     return(
         <>
             <div className={styles.cardBox}>

@@ -43,7 +43,6 @@ const deleteUploadedFiles = (files) => {
     if (!files) return;
 
     Object.values(files).flat().forEach(file => {
-        /* const editedFileName = file.replace(/^\/images\//, ''); */
         const filePath = path.join(__dirname, "..", "tech-nexus-frontend", "public", "images", file.filename);
         fs.unlink(filePath, (err) => {
             if (err) console.error("File deletion error:", err);
@@ -123,8 +122,6 @@ app.get("/products/:id", async (req, res) => {
 
 // Route for user registration
 // Password is being hashed using bcrypt module
-// BURN THIS WITH FLAMETHROWER
-// Optimize repetitions
 app.post("/register", async (req, res) => {
     try {
         const { username, email, password } = req.body;
@@ -640,7 +637,7 @@ app.delete("/delete/brand", async (req, res) => {
     }
 });
 
-// Get data to create poroduct in product constructor
+// Get data to create product in product constructor
 app.get("/product-constructor-data", async (req, res) => {
     try {
         const producersResult = await pool.query(
@@ -708,14 +705,9 @@ app.post("/create/product", upload.fields([
             return res.status(400).json({ message: "Заполните все обязательные поля, как минимум одну пару атрибут-значение и загрузите главное изображение" });
         }
 
-        if (forbiddenChars.test(product_name) || forbiddenChars.test(description) || forbiddenChars.test(price)) {
+        if (product_name.length < 3 || product_name.length > 27 ) {
             deleteUploadedFiles(req.files);
-            res.status(400).json({ message: "Одно из заполняемых полей содержит один или несколько запрещенных символов" });
-        }
-
-        if (product_name.length < 3 || product_name.length > 150 ) {
-            deleteUploadedFiles(req.files);
-            res.status(400).json({ message: "Название товара должно быть длинной от 3 до 150 символов включительно" });
+            res.status(400).json({ message: "Название товара должно быть длинной от 3 до 27 символов включительно" });
         }
 
         if (description.length > 600 ) {

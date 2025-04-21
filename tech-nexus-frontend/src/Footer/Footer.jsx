@@ -1,7 +1,5 @@
 import styles from "./Footer.module.css";
 
-// Add routes to <a> tags. Actualy, need to create something like "docs place".
-
 export default function Footer(){
 
     return(

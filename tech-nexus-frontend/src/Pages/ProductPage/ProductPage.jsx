@@ -3,9 +3,9 @@ import ImageGallery from "../../ImageGallery/ImageGallery.jsx";
 import FullCharacteristicsTable from "../../CharacteristicsTables/FullCharacteristicsTable/FullCharacteristicsTable.jsx";
 import SmallCharacteristicsTable from "../../CharacteristicsTables/SmallCharacteristicsTable/SmallCharacteristicsTable.jsx";
 import Notification from "../../Notification/Notification.jsx";
-import Review from "../../Review/Review.jsx";
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import Cookies from "js-cookie";
 
 export default function ProductPage(){
 
@@ -14,6 +14,7 @@ export default function ProductPage(){
     const { id } = useParams();
     const [product, setProduct] = useState(null);
     const [showSuccessfulPurchaseNotification, setShowSuccessfulPurchaseNotification] = useState(false);
+    const [showFailPurchaseNotification, setShowFailPurchaseNotification] = useState(false);
     const fullDescrRef = useRef(null);
 
     useEffect(() => {
@@ -39,8 +40,6 @@ export default function ProductPage(){
         fetchProduct();
     }, []);
 
-    /* console.log(product); */
-
     const handleGoBack = () => {
         navigate(-1);
     };
@@ -53,8 +52,14 @@ export default function ProductPage(){
         };
     };
 
-    /* I need to resize elements to be bigger, 
-    they all are kinda small for now. */
+    const handlePurchase = () => {
+        if (!Cookies.get("userId")) {
+            setShowFailPurchaseNotification(true);
+        }
+        else {
+            setShowSuccessfulPurchaseNotification(true);
+        }
+    };
 
     if(!product){
         return <p>Loading...</p>;
@@ -93,7 +98,7 @@ export default function ProductPage(){
 
                         <div className={styles.buyToCart}>
                             <span>{product.price} ₽</span>
-                            <button onClick={() => setShowSuccessfulPurchaseNotification(true)}>Купить</button>
+                            <button onClick={handlePurchase}>Купить</button>
                         </div>
                     </div>
 
@@ -109,27 +114,7 @@ export default function ProductPage(){
                                 characteristics={product.attributes.map(attr => attr.attribute)} 
                                 values={product.attributes.map(attr => attr.value)}
                             />
-
                         </div>
-                        
-                       {/*  <div className={styles.reviews}>
-                            <Review 
-                                rating={5}
-                                reviewText={"Отличный товар, хорошая цена!"}
-                            />    
-                            <Review 
-                                rating={5}
-                                reviewText={"Отличный товар, хорошая цена!"}
-                            />
-                            <Review 
-                                rating={5}
-                                reviewText={"Отличный товар, хорошая цена!"}
-                            />
-                            <Review 
-                                rating={5}
-                                reviewText={"Отличный товар, хорошая цена!"}
-                            />            
-                        </div> */}
                     </div>
                 </div>
 
@@ -138,6 +123,14 @@ export default function ProductPage(){
                         message={"Спасибо за покупку!"}
                         onClose={() => {
                             setShowSuccessfulPurchaseNotification(false);
+                        }}
+                    />
+                }
+                {showFailPurchaseNotification &&
+                    <Notification 
+                        message={"Вы должны быть авторизованы, чтобы совершить покупку."}
+                        onClose={() => {
+                            setShowFailPurchaseNotification(false);
                         }}
                     />
                 }

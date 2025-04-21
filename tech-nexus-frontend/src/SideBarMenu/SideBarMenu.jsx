@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import sideBarButton from "../assets/menu-symbol-of-three-parallel-lines-svgrepo-com.svg";
 import { Link } from "react-router-dom";
 
-// Add something bautiful here
-
 export default function SideBarMenu(){
 
     const [isOpen, setIsOpen] = useState(false);

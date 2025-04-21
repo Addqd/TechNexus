@@ -63,19 +63,6 @@ export default function ProductConstructor() {
         }
     }, []);
 
-    useEffect(() => {
-        console.log(previewImgData);
-    }, [previewImgData]);
-
-    useEffect(() => {
-        console.log(thumnbnails);
-    }, [thumnbnails]);
-
-    useEffect(() => {
-        console.log(selectedCategory);
-    }, [selectedCategory]);
-
-
     // Fetch data for constructor
     useEffect(() => {
         const fetchConstructorData = async () => {
@@ -108,14 +95,6 @@ export default function ProductConstructor() {
         
         fetchConstructorData();
     }, []);
-
-    useEffect(() => {
-        console.log(selectedAttributes);
-    }, [selectedAttributes]);
-
-    useEffect(() => {
-        console.log(selectedProducer);
-    }, [selectedProducer]);
 
     const userSelectNone = {
         userSelect: 'none',
@@ -250,8 +229,6 @@ export default function ProductConstructor() {
     const handleCategoryChange = (selectedOption) => {
         setSelectedCategory(selectedOption);
         setSelectedAttributes([]);
-        console.log(`Selected category: ${selectedOption.label} (${selectedOption.value})`);
-        console.log("Selected category object:", selectedOption);
     }
 
     const handleDescriptionChange = (e) => {

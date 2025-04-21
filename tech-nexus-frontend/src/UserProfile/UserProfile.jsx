@@ -281,7 +281,7 @@ export default function UserProfile () {
             }
             else {
                 const errorData = await response.json();
-                showFailNotification(true);
+                setShowFailNotification(true);
                 setFailMsg(errorData.error || errorData.message);
             }
 
@@ -379,7 +379,7 @@ export default function UserProfile () {
                                 </div>
                                 <span>{fullUserProfile.username}</span>
                                 <span>Бренд: {fullUserProfile.is_seller ? fullUserProfile.brand_name : "Нет бренда"}</span>
-                                <span>Адресс доставки: {fullUserProfile.shipping_address === null ? "Не указан" : fullUserProfile.shipping_address}</span>
+                                <span style={{"maxWidth": "280px", "textAlign": "center"}}>Адресс доставки: {fullUserProfile.shipping_address === null ? "Не указан" : fullUserProfile.shipping_address}</span>
                                 <button onClick={() => setIsWillingToEditProfile(true)}>Редактировать профиль</button>
                                 <button onClick={() => setIsWillingToDeleteProfile(true)}>Удалить профиль</button>
                                 
@@ -627,7 +627,6 @@ export default function UserProfile () {
                                     <span>Описание бренда</span>
                                     <span className={styles.brandDescription}>{fullUserProfile.brand_description}</span>
                                     <div className={styles.brandAndProfileActionsWrapper}>
-                                        <button>Заказы клиентов</button>
                                         <Link to={`/brand_products/${brandId}`} className={styles.linkBtn}>
                                             Товары бренда    
                                         </Link>

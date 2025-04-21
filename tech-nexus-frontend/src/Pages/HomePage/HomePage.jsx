@@ -7,9 +7,6 @@ import { useState, useEffect } from "react";
 
 export default function HomePage() {
 
-    // Product card generation according to data in db. Loads on mount of this component,  
-    // meaning when main page loads we see all products in there
-
     const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
 

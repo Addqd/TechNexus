@@ -70,8 +70,6 @@ export default function ImageGallery({ thumbnails }) {
         mainImgRef.current.style.transformOrigin = `${xPercent}% ${yPercent}%`;
     };
 
-    console.log(thumbnails);
-
     return(
         <>
             <div className={styles.imgGallery}>

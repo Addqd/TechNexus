@@ -105,9 +105,7 @@ export default function Header(){
                 return;
             }
 
-            /* const isEnterButton = enterButtonRef.current.contains(event.target); */
-
-            if (/* !isEnterButton && */
+            if (
             (miniAccountModalRef.current && !miniAccountModalRef.current.contains(event.target)) ||
             (enterModalRef.current && !enterModalRef.current.contains(event.target))) {
                 setIsMiniAccountModalOpen(false);
