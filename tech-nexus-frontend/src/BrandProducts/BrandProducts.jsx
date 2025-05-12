@@ -143,20 +143,20 @@ export default function BrandProducts() {
                                     onClick={() => setProductToDelete(product)} 
                                 />        
                             )}
-                            {productToDelete  &&
-                                <div className={styles.deleteBrandAndProfileModal}>
-                                    <div className={styles.deleteBrandAndProfileModalContent}>
-                                        <span>Вы действительно хотите удалить этот товар?</span>
-                                        <span>После удаления все связанные с ним данные будут недоступны.</span>
-                                        <div className={styles.deleteBrandAndProfileModalActionsWrapper}>
-                                            <button onClick={() => {console.log(productToDelete.id); setProductToDelete(null)}}>Отмена</button>
-                                            <button onClick={() => handleRemoveProduct(productToDelete)}>Удалить продукт</button> 
-                                        </div>    
-                                    </div>
-                                </div>  
-                            }    
                         </div>
                     ))}
+                    {productToDelete  &&
+                        <div className={styles.deleteBrandAndProfileModal}>
+                            <div className={styles.deleteBrandAndProfileModalContent}>
+                                <span>Вы действительно хотите удалить этот товар?</span>
+                                <span>После удаления все связанные с ним данные будут недоступны.</span>
+                                <div className={styles.deleteBrandAndProfileModalActionsWrapper}>
+                                    <button onClick={() => {console.log(productToDelete.id); setProductToDelete(null)}}>Отмена</button>
+                                    <button onClick={() => handleRemoveProduct(productToDelete)}>Удалить продукт</button> 
+                                </div>    
+                            </div>
+                        </div>  
+                    }    
                     {productsToDisplay.length > 0 &&
                         <div className={styles.pageCounter}>
                             <button className={styles.arrowBtn} onClick={handlePrevPage} disabled={currentPage === 1}>
